@@ -133,6 +133,7 @@ public class WidgetID
 	public static final int FULLSCREEN_MAP_GROUP_ID = 165;
 	public static final int QUESTLIST_GROUP_ID = 399;
 	public static final int SKILLS_GROUP_ID = 320;
+	public static final int QUESTTAB_GROUP_ID = 629;
 	public static final int MUSIC_GROUP_ID = 239;
 	public static final int BARROWS_PUZZLE_GROUP_ID = 25;
 	public static final int KEPT_ON_DEATH_GROUP_ID = 4;
@@ -828,6 +829,12 @@ public class WidgetID
 		static final int MEMBERS_CONTAINER = 7;
 		static final int MINIQUEST_CONTAINER = 8;
 	}
+
+	static class QuestTab
+	{
+		static final int QUEST_TAB = 3;
+	}
+
 	static class Music
 	{
 		static final int CONTAINER = 0;
