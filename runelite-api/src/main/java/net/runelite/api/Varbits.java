@@ -633,6 +633,8 @@ public enum Varbits
 	QUEST_FAMILY_PEST(5347),
 	QUEST_THE_MAGE_ARENA_II(6067),
 
+	DIALOG_CHOICE(5983),
+
 	/**
 	* Ernest the chicken quest puzzle levers
 	 */

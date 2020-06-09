@@ -31,11 +31,18 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.api.Client;
 import net.runelite.api.SpriteID;
+import net.runelite.api.Varbits;
+import net.runelite.api.events.VarbitChanged;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
 import static net.runelite.client.plugins.questhelper.QuestHelperOverlay.TITLED_CONTENT_COLOR;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
+import net.runelite.client.plugins.questhelper.steps.choice.DialogChoiceStep;
+import net.runelite.client.plugins.questhelper.steps.choice.DialogChoiceSteps;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
@@ -43,14 +50,25 @@ import net.runelite.client.ui.overlay.components.TitleComponent;
 public abstract class QuestStep implements Module
 {
 	@Inject
+	private Client client;
+
+	@Inject
+	private ClientThread clientThread;
+
+	@Inject
 	SpriteManager spriteManager;
 
 	@Setter
 	@Getter
-	private final String text;
+	private String text;
+
+	private int currentChoice = 0;
 
 	@Getter
 	private final QuestHelper questHelper;
+
+	@Getter
+	public DialogChoiceSteps choices = new DialogChoiceSteps();
 
 	public QuestStep(QuestHelper questHelper, String text)
 	{
@@ -71,6 +89,25 @@ public abstract class QuestStep implements Module
 	{
 	}
 
+	@Subscribe
+	public void onVarbitChanged(VarbitChanged event)
+	{
+		int newChoice = client.getVar(Varbits.DIALOG_CHOICE);
+		if(currentChoice == 0 && newChoice == 1) {
+			clientThread.invokeLater(this::highlightChoice);
+		}
+		currentChoice = newChoice;
+	}
+
+	public void highlightChoice() {
+		choices.checkChoices(client);
+	}
+
+	public void addDialogStep(String choice)
+	{
+		choices.addChoice(new DialogChoiceStep(choice));
+	}
+
 	public void makeOverlayHint(PanelComponent panelComponent, QuestHelperPlugin plugin)
 	{
 		panelComponent.getChildren().add(TitleComponent.builder().text(questHelper.getQuest().getName()).build());
@@ -82,7 +119,10 @@ public abstract class QuestStep implements Module
 			.build());
 	}
 
-	public abstract void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin);
+	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
+	{
+
+	}
 
 	public BufferedImage getQuestImage()
 	{

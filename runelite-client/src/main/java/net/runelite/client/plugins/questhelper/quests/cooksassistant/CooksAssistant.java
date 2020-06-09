@@ -50,6 +50,7 @@ public class CooksAssistant extends BasicQuestHelper
 			"Give the Cook in Lumbridge Castle's kitchen the required items to finish the quest.",
 			new ItemRequirement(ItemID.BUCKET_OF_MILK), new ItemRequirement(ItemID.POT_OF_FLOUR),
 			new ItemRequirement(ItemID.EGG)));
+		steps.get(0).addDialogStep("I'll get right on it.");
 
 		steps.put(1, steps.get(0));
 

@@ -100,7 +100,7 @@ public class ErnestPuzzleStep extends QuestStep implements OwnerStep
 	}
 
 	@Subscribe
-	private void onVarbitChanged(VarbitChanged event)
+	public void onVarbitChanged(VarbitChanged event)
 	{
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{

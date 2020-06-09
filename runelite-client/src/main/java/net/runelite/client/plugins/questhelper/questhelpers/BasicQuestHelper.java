@@ -25,6 +25,10 @@
 package net.runelite.client.plugins.questhelper.questhelpers;
 
 import java.util.Map;
+import net.runelite.api.GameState;
+import net.runelite.api.Varbits;
+import net.runelite.api.events.VarbitChanged;
+import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.questhelper.steps.QuestStep;
 
 public abstract class BasicQuestHelper extends QuestHelper
