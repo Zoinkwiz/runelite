@@ -25,17 +25,22 @@
 package net.runelite.client.plugins.questhelper;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.runelite.api.Client;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
+import net.runelite.api.ItemContainer;
 
 public class ItemRequirement
 {
 	@Getter
-	private int id;
+	private final int id;
 	@Getter
-	private int quantity;
+	private final int quantity;
 	private boolean equip;
+	@Setter
+	@Getter
+	private String tip;
 
 	public ItemRequirement(int id)
 	{
@@ -57,28 +62,47 @@ public class ItemRequirement
 
 	public boolean check(Client client)
 	{
-		Item[] items;
-		if (equip)
+		ItemContainer equipped = client.getItemContainer(InventoryID.EQUIPMENT);
+		int tempQuantity = quantity;
+
+		if(equipped != null)
 		{
-			items = client.getItemContainer(InventoryID.EQUIPMENT).getItems();
-		}
-		else
-		{
-			items = client.getItemContainer(InventoryID.INVENTORY).getItems();
+			Item[] equippedItems = equipped.getItems();
+
+			for (Item item : equippedItems)
+			{
+				if (item.getId() == id)
+				{
+					if (item.getQuantity() >= tempQuantity)
+					{
+						return true;
+					}
+					else
+					{
+						tempQuantity -= item.getQuantity();
+					}
+				}
+			}
 		}
 
-		int tempQuantity = quantity;
-		for (Item item : items)
-		{
-			if (item.getId() == id)
+		if(!equip) {
+			ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
+			if(inventory != null)
 			{
-				if (item.getQuantity() >= tempQuantity)
+				Item[] inventoryItems = inventory.getItems();
+				for (Item item : inventoryItems)
 				{
-					return true;
-				}
-				else
-				{
-					tempQuantity -= item.getQuantity();
+					if (item.getId() == id)
+					{
+						if (item.getQuantity() >= tempQuantity)
+						{
+							return true;
+						}
+						else
+						{
+							tempQuantity -= item.getQuantity();
+						}
+					}
 				}
 			}
 		}
