@@ -24,12 +24,17 @@
  */
 package net.runelite.client.plugins.questhelper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Client;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
+import net.runelite.api.ItemID;
 
 public class ItemRequirement
 {
@@ -41,6 +46,8 @@ public class ItemRequirement
 	@Setter
 	@Getter
 	private String tip;
+
+	private List<Integer> alternates = new ArrayList<>();
 
 	public ItemRequirement(int id)
 	{
@@ -60,6 +67,14 @@ public class ItemRequirement
 		this.equip = equip;
 	}
 
+	public void addAlternates(List<Integer> alternates) {
+		this.alternates.addAll(alternates);
+	}
+
+	public void addAlternates(Integer... alternates) {
+		Collections.addAll(this.alternates, alternates);
+	}
+
 	public boolean check(Client client)
 	{
 		ItemContainer equipped = client.getItemContainer(InventoryID.EQUIPMENT);
@@ -71,7 +86,7 @@ public class ItemRequirement
 
 			for (Item item : equippedItems)
 			{
-				if (item.getId() == id)
+				if (item.getId() == id || alternates.contains(id))
 				{
 					if (item.getQuantity() >= tempQuantity)
 					{
@@ -92,7 +107,7 @@ public class ItemRequirement
 				Item[] inventoryItems = inventory.getItems();
 				for (Item item : inventoryItems)
 				{
-					if (item.getId() == id)
+					if (item.getId() == id || alternates.contains(id))
 					{
 						if (item.getQuantity() >= tempQuantity)
 						{
