@@ -45,7 +45,7 @@ public class DigStep extends DetailedQuestStep
 	public DigStep(QuestHelper questHelper, WorldPoint worldPoint, String text, ItemRequirement... itemRequirements)
 	{
 		super(questHelper, worldPoint, text, itemRequirements);
-		this.itemRequirements.add(new ItemRequirement(ItemID.SPADE));
+		this.itemRequirements.add(new ItemRequirement("Spade", ItemID.SPADE));
 	}
 
 	@Override

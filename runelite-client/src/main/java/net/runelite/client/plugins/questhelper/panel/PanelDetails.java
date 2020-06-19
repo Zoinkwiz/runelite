@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Zoinkwiz
+ * Copyright (c) 2020, Zoinkwiz <https://github.com/Zoinkwiz>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,45 +22,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.questhelper;
+package net.runelite.client.plugins.questhelper.panel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import lombok.Getter;
-import net.runelite.api.ItemID;
+import net.runelite.client.plugins.questhelper.ItemRequirement;
+import net.runelite.client.plugins.questhelper.steps.QuestStep;
 
-public class ItemCollections
-{
+public class PanelDetails {
 	@Getter
-	private static List<Integer> axes = new ArrayList<>(Arrays.asList(
-		ItemID.BRONZE_AXE,
-		ItemID.IRON_AXE,
-		ItemID.STEEL_AXE,
-		ItemID.BLACK_AXE,
-		ItemID.MITHRIL_AXE,
-		ItemID.ADAMANT_AXE,
-		ItemID.GILDED_AXE,
-		ItemID.RUNE_AXE,
-		ItemID.DRAGON_AXE,
-		ItemID.INFERNAL_AXE,
-		ItemID._3RD_AGE_AXE,
-		ItemID.CRYSTAL_AXE)
-	);
+	String header;
 
 	@Getter
-	private static List<Integer> pickaxes = new ArrayList<>(Arrays.asList(
-			ItemID.BRONZE_PICKAXE,
-			ItemID.IRON_PICKAXE,
-			ItemID.STEEL_PICKAXE,
-			ItemID.BLACK_PICKAXE,
-			ItemID.MITHRIL_PICKAXE,
-			ItemID.ADAMANT_PICKAXE,
-			ItemID.GILDED_PICKAXE,
-			ItemID.RUNE_PICKAXE,
-			ItemID.DRAGON_PICKAXE,
-			ItemID.INFERNAL_PICKAXE,
-			ItemID._3RD_AGE_PICKAXE,
-			ItemID.CRYSTAL_PICKAXE)
-	);
+	ArrayList<QuestStep> steps;
+
+	@Getter
+	ArrayList<ItemRequirement> itemRequirements;
+
+	public PanelDetails(String header) {
+		this.header = header;
+		this.steps = new ArrayList<>();
+	}
+
+	public PanelDetails(String header, QuestStep... steps) {
+		this.header = header;
+		this.steps = new ArrayList<>(Arrays.asList(steps));
+		this.itemRequirements = new ArrayList<>();
+	}
+
+	public PanelDetails(String header, ArrayList<QuestStep> steps, ItemRequirement... itemRequirements) {
+		this.header = header;
+		this.steps = steps;
+		this.itemRequirements = new ArrayList<>(Arrays.asList(itemRequirements));
+	}
+
+	public void addSteps(QuestStep... steps) {
+		this.steps.addAll(Arrays.asList(steps));
+	}
 }

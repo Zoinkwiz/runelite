@@ -25,21 +25,24 @@
 package net.runelite.client.plugins.questhelper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.inject.Inject;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Client;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
-import net.runelite.api.ItemID;
+import net.runelite.client.game.ItemManager;
 
 public class ItemRequirement
 {
 	@Getter
 	private final int id;
+
+	private String name;
+
 	@Getter
 	private final int quantity;
 	private boolean equip;
@@ -49,21 +52,22 @@ public class ItemRequirement
 
 	private List<Integer> alternates = new ArrayList<>();
 
-	public ItemRequirement(int id)
+	public ItemRequirement(String name, int id)
 	{
-		this(id, 1);
+		this(name, id, 1);
 	}
 
-	public ItemRequirement(int id, int quantity)
+	public ItemRequirement(String name, int id, int quantity)
 	{
 		this.id = id;
 		this.quantity = quantity;
+		this.name = name;
 		equip = false;
 	}
 
-	public ItemRequirement(int id, int quantity, boolean equip)
+	public ItemRequirement(String name, int id, int quantity, boolean equip)
 	{
-		this(id, quantity);
+		this(name, id, quantity);
 		this.equip = equip;
 	}
 
@@ -73,6 +77,16 @@ public class ItemRequirement
 
 	public void addAlternates(Integer... alternates) {
 		Collections.addAll(this.alternates, alternates);
+	}
+
+	public void addName(String name)
+	{
+		this.name = name;
+	}
+
+	public String getName()
+	{
+		return name;
 	}
 
 	public boolean check(Client client)

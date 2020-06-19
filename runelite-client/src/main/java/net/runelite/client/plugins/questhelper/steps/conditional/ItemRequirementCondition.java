@@ -25,34 +25,24 @@
 package net.runelite.client.plugins.questhelper.steps.conditional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import net.runelite.api.Client;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.plugins.questhelper.ItemRequirement;
 import net.runelite.client.plugins.questhelper.ItemRequirements;
 
 public class ItemRequirementCondition extends ConditionForStep
 {
-	private final List<ItemRequirements> itemRequirements;
+	private final List<ItemRequirement> itemRequirements;
 
 	// TODO: This do nothin'
 	private final boolean checkHasItem;
 
-	public ItemRequirementCondition(int... itemIds)
+	public ItemRequirementCondition(ItemRequirement... itemRequirements)
 	{
 		this.itemRequirements = new ArrayList<>();
-		for (int itemId : itemIds)
-		{
-			this.itemRequirements.add(new ItemRequirements(itemId));
-		}
-		this.checkHasItem = true;
-	}
-
-	public ItemRequirementCondition(ItemRequirements... itemRequirements)
-	{
-		this.itemRequirements = new ArrayList<>();
-		for (ItemRequirements itemRequirement : itemRequirements)
-		{
-			this.itemRequirements.add(itemRequirement);
-		}
+		this.itemRequirements.addAll(Arrays.asList(itemRequirements));
 		this.checkHasItem = true;
 	}
 
@@ -60,7 +50,7 @@ public class ItemRequirementCondition extends ConditionForStep
 	public boolean checkCondition(Client client)
 	{
 		int successes = 0;
-		for (ItemRequirements itemRequirement : itemRequirements)
+		for (ItemRequirement itemRequirement : itemRequirements)
 		{
 			if (itemRequirement.check(client) == checkHasItem)
 			{

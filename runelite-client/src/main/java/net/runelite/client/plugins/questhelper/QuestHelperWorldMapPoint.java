@@ -47,7 +47,7 @@ public class QuestHelperWorldMapPoint extends WorldMapPoint
 		Graphics graphics = questWorldImage.getGraphics();
 		graphics.drawImage(mapArrow, 0, 0, null);
 		int buffer = mapArrow.getWidth() / 2 - image.getWidth() / 2;
-		buffer = buffer < 0 ? 0 : buffer;
+		buffer = Math.max(buffer, 0);
 		graphics.drawImage(image, buffer, buffer, null);
 		questWorldImagePoint = new Point(questWorldImage.getWidth() / 2, questWorldImage.getHeight());
 

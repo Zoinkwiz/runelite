@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import net.runelite.api.Client;
+import net.runelite.client.game.ItemManager;
 
 public class ItemRequirements
 {
@@ -35,20 +36,20 @@ public class ItemRequirements
 
 	Set<ItemRequirements> alternates = new HashSet<>();
 
-	public ItemRequirements(int id)
+	public ItemRequirements(ItemManager itemManager, int id)
 	{
-		this(id, 1);
+		this(itemManager, id, 1);
 	}
 
-	public ItemRequirements(int id, int quantity)
+	public ItemRequirements(ItemManager itemManager, int id, int quantity)
 	{
-		this(id, quantity, false);
+		this(itemManager, id, quantity, false);
 	}
 
-	public ItemRequirements(int id, int quantity, boolean equip)
+	public ItemRequirements(ItemManager itemManager, int id, int quantity, boolean equip)
 	{
 		itemRequirements = new HashSet<>();
-		itemRequirements.add(new ItemRequirement(id, quantity, equip));
+		itemRequirements.add(new ItemRequirement("name", id, quantity, equip));
 	}
 
 	public ItemRequirements(ItemRequirement... itemRequirements)

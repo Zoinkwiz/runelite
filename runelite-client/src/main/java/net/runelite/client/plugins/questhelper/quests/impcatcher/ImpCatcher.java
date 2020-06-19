@@ -24,6 +24,8 @@
  */
 package net.runelite.client.plugins.questhelper.quests.impcatcher;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import net.runelite.api.ItemID;
@@ -31,7 +33,9 @@ import net.runelite.api.NpcID;
 import net.runelite.api.Quest;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.questhelper.ItemRequirement;
+import net.runelite.client.plugins.questhelper.panel.PanelDetails;
 import net.runelite.client.plugins.questhelper.questhelpers.BasicQuestHelper;
+import net.runelite.client.plugins.questhelper.steps.DetailedQuestStep;
 import net.runelite.client.plugins.questhelper.steps.NpcTalkStep;
 import net.runelite.client.plugins.questhelper.steps.QuestStep;
 import net.runelite.client.plugins.questhelper.QuestDescriptor;
@@ -41,18 +45,54 @@ import net.runelite.client.plugins.questhelper.QuestDescriptor;
 )
 public class ImpCatcher extends BasicQuestHelper
 {
+	ItemRequirement blackBead, whiteBead, redBead, yellowBead;
+
 	@Override
 	public Map<Integer, QuestStep> loadSteps()
 	{
 		Map<Integer, QuestStep> steps = new HashMap<>();
 
+		setupRequirements();
+
 		steps.put(0, new NpcTalkStep(this, NpcID.WIZARD_MIZGOG, new WorldPoint(3103, 3163, 2),
 			"Talk to Wizard Mizgog on the top floor of the Wizards' Tower with the required items to finish the quest.",
-			new ItemRequirement(ItemID.BLACK_BEAD), new ItemRequirement(ItemID.WHITE_BEAD),
-			new ItemRequirement(ItemID.RED_BEAD), new ItemRequirement(ItemID.YELLOW_BEAD)));
+			blackBead, whiteBead, redBead, yellowBead));
 
 		steps.put(1, steps.get(0));
 
 		return steps;
+	}
+
+	private void setupRequirements() {
+		blackBead = new ItemRequirement("Black bead", ItemID.BLACK_BEAD);
+		whiteBead = new ItemRequirement("White bead", ItemID.WHITE_BEAD);
+		redBead = new ItemRequirement("Red bead", ItemID.RED_BEAD);
+		yellowBead = new ItemRequirement("Yellow bead", ItemID.YELLOW_BEAD);
+	}
+
+	@Override
+	public ArrayList<ItemRequirement> getItemRequirements()
+	{
+		ArrayList<ItemRequirement> reqs = new ArrayList<>();
+		reqs.add(blackBead);
+		reqs.add(whiteBead);
+		reqs.add(redBead);
+		reqs.add(yellowBead);
+
+		return reqs;
+	}
+
+	@Override
+	public ArrayList<PanelDetails> getPanels()
+	{
+		ArrayList<PanelDetails> allSteps = new ArrayList<>();
+		allSteps.add(new PanelDetails("Bring Mizgog his beads", new ArrayList<>(Arrays.asList(new DetailedQuestStep(this, "Bring Mizgog his beads. You can either buy them, or kill imps for them."))), blackBead, whiteBead, redBead, yellowBead));
+		return allSteps;
+	}
+
+	@Override
+	public String getCombatRequirements()
+	{
+		return "Imps (level 8) if you plan on collecting the beads yourself";
 	}
 }

@@ -24,11 +24,14 @@
  */
 package net.runelite.client.plugins.questhelper.quests.ernestthechicken;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import net.runelite.api.ItemID;
 import net.runelite.api.NpcID;
 import net.runelite.api.Quest;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.plugins.questhelper.ItemRequirement;
 import net.runelite.client.plugins.questhelper.QuestDescriptor;
 import net.runelite.client.plugins.questhelper.questhelpers.BasicQuestHelper;
 import net.runelite.client.plugins.questhelper.steps.NpcTalkStep;
@@ -55,5 +58,11 @@ public class ErnestTheChicken extends BasicQuestHelper
 		steps.put(1, new ErnestPuzzleStep(this));
 
 		return steps;
+	}
+
+	@Override
+	public ArrayList<ItemRequirement> getItemRequirements()
+	{
+		return null;
 	}
 }

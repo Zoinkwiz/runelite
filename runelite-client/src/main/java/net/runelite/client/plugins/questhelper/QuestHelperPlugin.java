@@ -31,11 +31,13 @@ import com.google.inject.Binder;
 import com.google.inject.CreationException;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.swing.SwingUtilities;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
@@ -51,10 +53,17 @@ import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.RuneLite;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.questhelper.panel.QuestHelperPanel;
+import net.runelite.client.plugins.questhelper.questhelpers.BasicQuestHelper;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 
 @PluginDescriptor(
@@ -88,6 +97,9 @@ public class QuestHelperPlugin extends Plugin
 	private Client client;
 
 	@Inject
+	private ClientToolbar clientToolbar;
+
+	@Inject
 	private EventBus eventBus;
 
 	@Inject
@@ -104,12 +116,30 @@ public class QuestHelperPlugin extends Plugin
 
 	private Map<String, QuestHelper> quests;
 
+	@Inject
+	SpriteManager spriteManager;
+
+	private QuestHelperPanel panel;
+
+	private NavigationButton navButton;
+
 	@Override
 	protected void startUp() throws IOException
 	{
 		quests = scanAndInstantiate(getClass().getClassLoader(), QUEST_PACKAGE);
 		overlayManager.add(questHelperOverlay);
 		overlayManager.add(questHelperWorldOverlay);
+
+		final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "quest_icon.png");
+		panel = new QuestHelperPanel(this, client);
+		navButton = NavigationButton.builder()
+			.tooltip("Quest Helper")
+			.icon(icon)
+			.priority(7)
+			.panel(panel)
+			.build();
+
+		clientToolbar.addNavigation(navButton);
 	}
 
 	@Override
@@ -117,6 +147,7 @@ public class QuestHelperPlugin extends Plugin
 	{
 		overlayManager.remove(questHelperOverlay);
 		overlayManager.remove(questHelperWorldOverlay);
+		clientToolbar.removeNavigation(navButton);
 		quests = null;
 		shutDownQuest();
 	}
@@ -226,6 +257,10 @@ public class QuestHelperPlugin extends Plugin
 			selectedQuest = questHelper;
 			eventBus.register(selectedQuest);
 			selectedQuest.startUp();
+			SwingUtilities.invokeLater(() -> {
+				panel.removeQuest();
+				panel.addQuest((BasicQuestHelper) questHelper);
+			});
 		}
 		else
 		{
@@ -238,6 +273,7 @@ public class QuestHelperPlugin extends Plugin
 		if (selectedQuest != null)
 		{
 			selectedQuest.shutDown();
+			SwingUtilities.invokeLater(() -> panel.removeQuest());
 			eventBus.unregister(selectedQuest);
 			selectedQuest = null;
 		}

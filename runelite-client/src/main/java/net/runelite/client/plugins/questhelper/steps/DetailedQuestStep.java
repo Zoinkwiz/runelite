@@ -64,7 +64,7 @@ public class DetailedQuestStep extends QuestStep
 
 	protected WorldPoint worldPoint;
 	protected List<ItemRequirement> itemRequirements = new ArrayList<>();
-	protected HashMap<Integer, List<Tile>> tileHighlights = new HashMap<Integer, List<Tile>>();
+	protected HashMap<Integer, List<Tile>> tileHighlights = new HashMap<>();
 
 	@Getter
 	public DialogChoiceSteps choices = new DialogChoiceSteps();
@@ -131,7 +131,7 @@ public class DetailedQuestStep extends QuestStep
 		panelComponent.getChildren().add(LineComponent.builder().left("Required Items:").build());
 		for (ItemRequirement itemRequirement : itemRequirements)
 		{
-			String text = itemRequirement.getQuantity() + " x " + itemManager.getItemComposition(itemRequirement.getId()).getName();
+			String text = itemRequirement.getQuantity() + " x " + itemRequirement.getName();
 			Color color;
 			if (itemRequirement.check(client))
 			{
@@ -188,7 +188,11 @@ public class DetailedQuestStep extends QuestStep
 			}
 			if (!itemStillOnTile)
 			{
-				tileHighlights.get(itemDespawned.getItem().getId()).remove(itemDespawned.getTile());
+				List<Tile> currentTile = tileHighlights.get(itemDespawned.getItem().getId());
+				if (currentTile != null)
+				{
+					currentTile.remove(itemDespawned.getTile());
+				}
 			}
 		}
 	}

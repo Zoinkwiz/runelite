@@ -24,6 +24,8 @@
  */
 package net.runelite.client.plugins.questhelper.quests.cooksassistant;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import net.runelite.api.ItemID;
@@ -32,7 +34,9 @@ import net.runelite.api.Quest;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.questhelper.ItemRequirement;
 import net.runelite.client.plugins.questhelper.QuestDescriptor;
+import net.runelite.client.plugins.questhelper.panel.PanelDetails;
 import net.runelite.client.plugins.questhelper.questhelpers.BasicQuestHelper;
+import net.runelite.client.plugins.questhelper.steps.DetailedQuestStep;
 import net.runelite.client.plugins.questhelper.steps.NpcTalkStep;
 import net.runelite.client.plugins.questhelper.steps.QuestStep;
 
@@ -41,19 +45,54 @@ import net.runelite.client.plugins.questhelper.steps.QuestStep;
 )
 public class CooksAssistant extends BasicQuestHelper
 {
+	ItemRequirement egg, milk, flour;
+
 	@Override
 	public Map<Integer, QuestStep> loadSteps()
 	{
+		setupItemRequirements();
 		Map<Integer, QuestStep> steps = new HashMap<>();
 
 		steps.put(0, new NpcTalkStep(this, NpcID.COOK_4626, new WorldPoint(3206, 3214, 0),
 			"Give the Cook in Lumbridge Castle's kitchen the required items to finish the quest.",
-			new ItemRequirement(ItemID.BUCKET_OF_MILK), new ItemRequirement(ItemID.POT_OF_FLOUR),
-			new ItemRequirement(ItemID.EGG)));
+			egg, milk, flour));
 		steps.get(0).addDialogStep("I'll get right on it.");
 
 		steps.put(1, steps.get(0));
 
 		return steps;
+	}
+
+	public void setupItemRequirements() {
+		egg = new ItemRequirement("Egg", ItemID.EGG);
+		egg.setTip("You can find an egg in the farm north of Lumbridge.");
+		milk = new ItemRequirement("Bucket of milk", ItemID.BUCKET_OF_MILK);
+		milk.setTip("You can get a bucket from the Lumbridge General Store, then milk a Dairy Cow north-east of Lumbridge.");
+		flour = new ItemRequirement("Pot of flour", ItemID.FLOUR);
+		flour.setTip("You can buy a pot from the Lumbridge General Store, collect some wheat from a field north of Lumbridge, then grind it in the Lumbridge Mill north of Lumbridge");
+	}
+
+	@Override
+	public ArrayList<ItemRequirement> getItemRequirements()
+	{
+		ArrayList<ItemRequirement> reqs = new ArrayList<>();
+		reqs.add(egg);
+		reqs.add(flour);
+		reqs.add(milk);
+		return reqs;
+	}
+
+	@Override
+	public ArrayList<PanelDetails> getPanels()
+	{
+		ArrayList<PanelDetails> allSteps = new ArrayList<>();
+		allSteps.add(new PanelDetails("Bring the cook cake ingredients", new ArrayList<>(Arrays.asList(new DetailedQuestStep(this, "Bring the cook the ingredients he needs."))), egg, flour, milk));
+		return allSteps;
+	}
+
+	@Override
+	public String getCombatRequirements()
+	{
+		return null;
 	}
 }

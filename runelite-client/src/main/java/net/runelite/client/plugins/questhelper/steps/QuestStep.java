@@ -112,7 +112,6 @@ public abstract class QuestStep implements Module
 	{
 		panelComponent.getChildren().add(TitleComponent.builder().text(questHelper.getQuest().getName()).build());
 
-		panelComponent.getChildren().add(LineComponent.builder().left("Step: " +  questHelper.getVar()).build());
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left(text)
 			.leftColor(TITLED_CONTENT_COLOR)
@@ -121,7 +120,6 @@ public abstract class QuestStep implements Module
 
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
-
 	}
 
 	public BufferedImage getQuestImage()
