@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2018, Lotto <https://github.com/devLotto>
- * Copyright (c) 2019, Trevor <https://github.com/Trevor159>
+ * Copyright (c) 2020, Zoinkwiz <https://github.com/Zoinkwiz>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,45 +22,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.questhelper;
+package net.runelite.client.plugins.questhelper.steps.conditional;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import javax.inject.Inject;
-import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
-import net.runelite.client.ui.overlay.Overlay;
-import net.runelite.client.ui.overlay.OverlayLayer;
-import net.runelite.client.ui.overlay.OverlayPosition;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import net.runelite.api.Client;
 
-public class QuestHelperWorldOverlay extends Overlay
+public class Conditions
 {
-	public static final int IMAGE_Z_OFFSET = 30;
+	List<ConditionForStep> conditions;
 
-	public static final Color CLICKBOX_BORDER_COLOR = Color.CYAN;
-	public static final Color CLICKBOX_HOVER_BORDER_COLOR = CLICKBOX_BORDER_COLOR.darker();
-	public static final Color CLICKBOX_FILL_COLOR = new Color(0, 255, 255, 20);
-
-	private final QuestHelperPlugin plugin;
-
-	@Inject
-	public QuestHelperWorldOverlay(QuestHelperPlugin plugin)
-	{
-		setPosition(OverlayPosition.DYNAMIC);
-		setLayer(OverlayLayer.ABOVE_SCENE);
-		this.plugin = plugin;
+	public Conditions(ConditionForStep... conditions) {
+		this.conditions = new ArrayList<>();
+		Collections.addAll(this.conditions, conditions);
 	}
 
-	@Override
-	public Dimension render(Graphics2D graphics)
-	{
-		QuestHelper quest = plugin.getSelectedQuest();
+	public void addCondition(ConditionForStep condition) {
+		conditions.add(condition);
+	}
 
-		if (quest != null && quest.getCurrentStep() != null)
+	public boolean checkConditions(Client client) {
+		for (ConditionForStep condition : conditions)
 		{
-			quest.getCurrentStep().makeWorldOverlayHint(graphics, plugin);
+			if(!condition.checkCondition(client)) {
+				return false;
+			}
 		}
-
-		return null;
+		return true;
 	}
 }

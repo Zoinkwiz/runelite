@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Tomas Slusny <slusnucky@gmail.com>
+ * Copyright (c) 2020, Zoinkwiz <https://github.com/Zoinkwiz>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,11 +22,45 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.questhelper.steps;
+package net.runelite.client.plugins.questhelper.steps.conditional;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import net.runelite.api.Client;
+import net.runelite.client.plugins.questhelper.Zone;
 
-public interface OwnerStep
+public class ZoneCondition extends ConditionForStep
 {
-	Collection<QuestStep> getSteps();
+
+	private final List<Zone> zones;
+	private final boolean checkInZone;
+
+	public ZoneCondition(Zone... zone)
+	{
+		this.zones = new ArrayList<>();
+		Collections.addAll(this.zones, zone);
+		this.checkInZone = true;
+	}
+
+	public ZoneCondition(boolean checkInZone, Zone... zone)
+	{
+		this.zones = new ArrayList<>();
+		Collections.addAll(this.zones, zone);
+		this.checkInZone = checkInZone;
+	}
+
+	@Override
+	public boolean checkCondition(Client client)
+	{
+		for (Zone zone : zones)
+		{
+			if (client.getLocalPlayer() != null && zone.contains(client.getLocalPlayer().getWorldLocation()))
+			{
+				// Check succeeded if check is to see if in zone, failed if not
+				return checkInZone;
+			}
+		}
+		return !checkInZone;
+	}
 }

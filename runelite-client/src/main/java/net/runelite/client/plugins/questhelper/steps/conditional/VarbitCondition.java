@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2018, Lotto <https://github.com/devLotto>
- * Copyright (c) 2019, Trevor <https://github.com/Trevor159>
+ * Copyright (c) 2020, Zoinkwiz <https://github.com/Zoinkwiz>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,45 +22,61 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.questhelper;
+package net.runelite.client.plugins.questhelper.steps.conditional;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import javax.inject.Inject;
-import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
-import net.runelite.client.ui.overlay.Overlay;
-import net.runelite.client.ui.overlay.OverlayLayer;
-import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.api.Client;
+import net.runelite.api.Varbits;
+import net.runelite.client.plugins.questhelper.Zone;
 
-public class QuestHelperWorldOverlay extends Overlay
+public class VarbitCondition extends ConditionForStep
 {
-	public static final int IMAGE_Z_OFFSET = 30;
 
-	public static final Color CLICKBOX_BORDER_COLOR = Color.CYAN;
-	public static final Color CLICKBOX_HOVER_BORDER_COLOR = CLICKBOX_BORDER_COLOR.darker();
-	public static final Color CLICKBOX_FILL_COLOR = new Color(0, 255, 255, 20);
+	private final int varbitId;
+	private final int value;
+	private final Operation operation;
 
-	private final QuestHelperPlugin plugin;
+	public enum Operation {
+		LESS_EQUAL,
+		EQUAL,
+		GREATER_EQUAL
+	}
 
-	@Inject
-	public QuestHelperWorldOverlay(QuestHelperPlugin plugin)
+	public VarbitCondition(int varbitId, int value)
 	{
-		setPosition(OverlayPosition.DYNAMIC);
-		setLayer(OverlayLayer.ABOVE_SCENE);
-		this.plugin = plugin;
+		this.varbitId = varbitId;
+		this.value = value;
+		this.operation = Operation.EQUAL;
+	}
+
+	public VarbitCondition(int varbitId, int value, Operation operation)
+	{
+		this.varbitId = varbitId;
+		this.value = value;
+		this.operation = operation;
 	}
 
 	@Override
-	public Dimension render(Graphics2D graphics)
+	public boolean checkCondition(Client client)
 	{
-		QuestHelper quest = plugin.getSelectedQuest();
-
-		if (quest != null && quest.getCurrentStep() != null)
+		if (operation == Operation.EQUAL)
 		{
-			quest.getCurrentStep().makeWorldOverlayHint(graphics, plugin);
+			return client.getVarbitValue(varbitId) <= value;
+		}
+		else if (operation == Operation.LESS_EQUAL)
+		{
+			return client.getVarbitValue(varbitId) == value;
 		}
 
-		return null;
+		else if (operation == Operation.GREATER_EQUAL)
+		{
+			return client.getVarbitValue(varbitId) >= value;
+		}
+		return false;
 	}
 }

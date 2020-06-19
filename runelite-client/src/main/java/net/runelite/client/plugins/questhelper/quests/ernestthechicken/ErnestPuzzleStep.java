@@ -43,7 +43,7 @@ import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
 import net.runelite.client.plugins.questhelper.Zone;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
 import net.runelite.client.plugins.questhelper.steps.ObjectStep;
-import net.runelite.client.plugins.questhelper.steps.OwnerStep;
+import net.runelite.client.plugins.questhelper.steps.conditional.OwnerStep;
 import net.runelite.client.plugins.questhelper.steps.QuestStep;
 import net.runelite.client.plugins.questhelper.steps.TileStep;
 import net.runelite.client.ui.overlay.components.PanelComponent;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Trevor <https://github.com/Trevor159>
+ * Copyright (c) 2020, Zoinkwiz <https://github.com/Zoinkwiz>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,96 +24,103 @@
  */
 package net.runelite.client.plugins.questhelper.steps;
 
+import com.google.inject.Inject;
 import java.awt.Graphics2D;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import javax.inject.Inject;
 import net.runelite.api.Client;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
-import net.runelite.client.plugins.questhelper.Zone;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
+import net.runelite.client.plugins.questhelper.steps.conditional.ConditionForStep;
+import net.runelite.client.plugins.questhelper.steps.conditional.Conditions;
+import net.runelite.client.plugins.questhelper.steps.conditional.OwnerStep;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 
-public class ZoneStep extends QuestStep implements OwnerStep
-{
-	@Inject
-	protected Client client;
 
+/* Conditions are checked in the order they were added */
+public class ConditionalStep extends QuestStep implements OwnerStep
+{
 	@Inject
 	protected EventBus eventBus;
 
-	private LinkedHashMap<Zone, QuestStep> steps;
-	private QuestStep currentStep;
-	private WorldPoint lastWorldPoint;
+	private boolean started = false;
 
-	public ZoneStep(QuestHelper questHelper, LinkedHashMap<Zone, QuestStep> steps)
-	{
+	private final LinkedHashMap<Conditions, QuestStep> steps;
+
+	private QuestStep currentStep;
+
+	public ConditionalStep(QuestHelper questHelper, QuestStep step) {
 		super(questHelper, null);
-		this.steps = steps;
+		this.steps = new LinkedHashMap<>();
+		this.steps.put(null, step);
+	}
+
+	public void addStep(Conditions conditions, QuestStep step) {
+		this.steps.put(conditions, step);
+	}
+
+	public void addStep(ConditionForStep condition, QuestStep step) {
+		this.steps.put(new Conditions(condition), step);
 	}
 
 	@Override
 	public void startUp()
 	{
 		updateSteps();
+		started = true;
 	}
 
 	@Override
 	public void shutDown()
 	{
+		started = false;
 		shutDownStep();
 		currentStep = null;
-		lastWorldPoint = null;
 	}
 
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
-		WorldPoint currentWorldPoint = client.getLocalPlayer().getWorldLocation();
-		if (lastWorldPoint == null || !currentWorldPoint.equals(lastWorldPoint))
+		if (started)
 		{
 			updateSteps();
-			lastWorldPoint = currentWorldPoint;
 		}
 	}
 
 	private void updateSteps()
 	{
-		for (Zone zone : steps.keySet())
+		for (Conditions conditions : steps.keySet())
 		{
-			if (zone != null || zone.contains(client.getLocalPlayer().getWorldLocation()))
+			if (conditions != null && conditions.checkConditions(client))
 			{
-				if (currentStep == null || !steps.get(zone).equals(currentStep))
-				{
-					shutDownStep();
-					startUpStep(steps.get(zone));
-				}
-				break;
+				startUpStep(steps.get(conditions));
+				return;
 			}
 		}
 
-		if (steps.containsKey(null))
-		{
-			shutDownStep();
-			startUpStep(steps.get(null));
-		}
+		startUpStep(steps.get(null));
 	}
 
-	private void startUpStep(QuestStep step)
+	protected void startUpStep(QuestStep step)
 	{
-		if (step != null)
+		if (currentStep == null)
 		{
+			eventBus.register(step);
+			step.startUp();
 			currentStep = step;
-			eventBus.register(currentStep);
-			currentStep.startUp();
+			return;
 		}
-		else
+
+		if (!step.equals(currentStep))
 		{
-			currentStep = null;
+			shutDownStep();
+			eventBus.register(step);
+			step.startUp();
+			currentStep = step;
 		}
 	}
 
@@ -130,13 +137,19 @@ public class ZoneStep extends QuestStep implements OwnerStep
 	@Override
 	public void makeOverlayHint(PanelComponent panelComponent, QuestHelperPlugin plugin)
 	{
-		currentStep.makeOverlayHint(panelComponent, plugin);
+		if(currentStep != null)
+		{
+			currentStep.makeOverlayHint(panelComponent, plugin);
+		}
 	}
 
 	@Override
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
-		currentStep.makeWorldOverlayHint(graphics, plugin);
+		if(currentStep != null)
+		{
+			currentStep.makeWorldOverlayHint(graphics, plugin);
+		}
 	}
 
 	@Override

@@ -22,23 +22,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.questhelper.steps;
+package net.runelite.client.plugins.questhelper.steps.remove;
 
 import java.awt.Graphics2D;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import javax.inject.Inject;
 import net.runelite.api.Client;
-import net.runelite.api.InventoryID;
-import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.plugins.questhelper.ItemRequirements;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
+import net.runelite.client.plugins.questhelper.Zone;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
+import net.runelite.client.plugins.questhelper.steps.QuestStep;
+import net.runelite.client.plugins.questhelper.steps.conditional.OwnerStep;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 
-public class ItemRequirementStep extends QuestStep implements OwnerStep
+public class ZoneStep extends QuestStep implements OwnerStep
 {
 	@Inject
 	protected Client client;
@@ -46,10 +48,11 @@ public class ItemRequirementStep extends QuestStep implements OwnerStep
 	@Inject
 	protected EventBus eventBus;
 
-	private LinkedHashMap<ItemRequirements, QuestStep> steps;
+	private LinkedHashMap<Zone, QuestStep> steps;
 	private QuestStep currentStep;
+	private WorldPoint lastWorldPoint;
 
-	public ItemRequirementStep(QuestHelper questHelper, LinkedHashMap<ItemRequirements, QuestStep> steps)
+	public ZoneStep(QuestHelper questHelper, LinkedHashMap<Zone, QuestStep> steps)
 	{
 		super(questHelper, null);
 		this.steps = steps;
@@ -66,27 +69,30 @@ public class ItemRequirementStep extends QuestStep implements OwnerStep
 	{
 		shutDownStep();
 		currentStep = null;
+		lastWorldPoint = null;
 	}
 
 	@Subscribe
-	public void onItemContainerChanged(ItemContainerChanged event)
+	public void onGameTick(GameTick event)
 	{
-		if (event.getItemContainer() == client.getItemContainer(InventoryID.INVENTORY))
+		WorldPoint currentWorldPoint = client.getLocalPlayer().getWorldLocation();
+		if (lastWorldPoint == null || !currentWorldPoint.equals(lastWorldPoint))
 		{
 			updateSteps();
+			lastWorldPoint = currentWorldPoint;
 		}
 	}
 
 	private void updateSteps()
 	{
-		for (ItemRequirements itemRequirements : steps.keySet())
+		for (Zone zone : steps.keySet())
 		{
-			if (itemRequirements != null || !itemRequirements.check(client))
+			if (zone != null || zone.contains(client.getLocalPlayer().getWorldLocation()))
 			{
-				if (currentStep == null || !steps.get(itemRequirements).equals(currentStep))
+				if (currentStep == null || !steps.get(zone).equals(currentStep))
 				{
 					shutDownStep();
-					startUpStep(steps.get(itemRequirements));
+					startUpStep(steps.get(zone));
 				}
 				break;
 			}

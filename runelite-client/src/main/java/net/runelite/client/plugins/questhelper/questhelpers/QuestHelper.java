@@ -36,7 +36,7 @@ import net.runelite.api.Client;
 import net.runelite.api.Quest;
 import net.runelite.api.QuestState;
 import net.runelite.client.eventbus.EventBus;
-import net.runelite.client.plugins.questhelper.steps.OwnerStep;
+import net.runelite.client.plugins.questhelper.steps.conditional.OwnerStep;
 import net.runelite.client.plugins.questhelper.steps.QuestStep;
 
 public abstract class QuestHelper implements Module
