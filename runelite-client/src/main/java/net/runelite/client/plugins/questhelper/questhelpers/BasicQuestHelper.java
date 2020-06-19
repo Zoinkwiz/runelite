@@ -25,24 +25,30 @@
 package net.runelite.client.plugins.questhelper.questhelpers;
 
 import java.util.Map;
-import net.runelite.api.GameState;
-import net.runelite.api.Varbits;
-import net.runelite.api.events.VarbitChanged;
-import net.runelite.client.eventbus.Subscribe;
+import lombok.Getter;
+import lombok.Setter;
+import net.runelite.client.plugins.questhelper.steps.QuestIntervalStep;
 import net.runelite.client.plugins.questhelper.steps.QuestStep;
 
 public abstract class BasicQuestHelper extends QuestHelper
 {
+	@Setter
+	@Getter
+	protected QuestIntervalStep questIntro;
+
 	protected Map<Integer, QuestStep> steps;
 	protected int var;
 
 	@Override
 	public void startUp()
 	{
-		steps = loadSteps();
-		instantiateSteps(steps.values());
-		var = getVar();
-		startUpStep(steps.get(var));
+		if(steps == null)
+		{
+			steps = loadSteps();
+			instantiateSteps(steps.values());
+			var = getVar();
+			startUpStep(steps.get(var));
+		}
 	}
 
 	@Override
@@ -55,10 +61,11 @@ public abstract class BasicQuestHelper extends QuestHelper
 	@Override
 	public boolean updateQuest()
 	{
-		if (var != getVar())
+		if (var < getVar())
 		{
+			var = getVar();
 			shutDownStep();
-			startUpStep(steps.get(getVar()));
+			startUpStep(steps.get(var));
 			return true;
 		}
 		return false;

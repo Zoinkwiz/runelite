@@ -43,6 +43,7 @@ import net.runelite.api.GameState;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Quest;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.VarbitChanged;
@@ -106,7 +107,6 @@ public class QuestHelperPlugin extends Plugin
 	@Override
 	protected void startUp() throws IOException
 	{
-
 		quests = scanAndInstantiate(getClass().getClassLoader(), QUEST_PACKAGE);
 		overlayManager.add(questHelperOverlay);
 		overlayManager.add(questHelperWorldOverlay);
@@ -119,6 +119,17 @@ public class QuestHelperPlugin extends Plugin
 		overlayManager.remove(questHelperWorldOverlay);
 		quests = null;
 		shutDownQuest();
+	}
+
+	@Subscribe
+	public void onGameStateChanged(final GameStateChanged event)
+	{
+		final GameState state = event.getGameState();
+
+		if (state == GameState.LOGIN_SCREEN && selectedQuest != null && selectedQuest.getCurrentStep() != null)
+		{
+			shutDownQuest();
+		}
 	}
 
 	@Subscribe
