@@ -20,6 +20,7 @@ import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.plugins.questhelper.ItemRequirement;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
 import net.runelite.client.plugins.questhelper.QuestHelperWorldMapPoint;
 import static net.runelite.client.plugins.questhelper.QuestHelperWorldOverlay.CLICKBOX_BORDER_COLOR;
@@ -29,7 +30,7 @@ import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
 
-public class TileStep extends QuestStep
+public class TileStep extends DetailedQuestStep
 {
 	@Inject
 	private Client client;
@@ -39,9 +40,9 @@ public class TileStep extends QuestStep
 
 	private WorldPoint worldPoint;
 
-	public TileStep(QuestHelper questHelper, WorldPoint worldPoint, String text)
+	public TileStep(QuestHelper questHelper, WorldPoint worldPoint, String text, ItemRequirement... itemRequirements)
 	{
-		super(questHelper, text);
+		super(questHelper, text, itemRequirements);
 		this.worldPoint = worldPoint;
 	}
 
@@ -70,6 +71,7 @@ public class TileStep extends QuestStep
 	@Override
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
+		super.makeWorldOverlayHint(graphics, plugin);
 		LocalPoint lp = LocalPoint.fromWorld(client, worldPoint);
 		if (lp == null)
 		{

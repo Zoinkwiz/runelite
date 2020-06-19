@@ -26,8 +26,6 @@ package net.runelite.client.plugins.questhelper.steps;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.util.Arrays;
-import java.util.List;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
@@ -36,44 +34,30 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.questhelper.ItemRequirement;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
-import net.runelite.client.plugins.questhelper.QuestHelperWorldMapPoint;
 import static net.runelite.client.plugins.questhelper.QuestHelperWorldOverlay.IMAGE_Z_OFFSET;
 import net.runelite.client.ui.overlay.OverlayUtil;
-import net.runelite.client.ui.overlay.components.LineComponent;
-import net.runelite.client.ui.overlay.components.PanelComponent;
-import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
 
-public class NpcTalkStep extends QuestStep
+public class NpcTalkStep extends DetailedQuestStep
 {
 	@Inject
 	protected Client client;
 
-	@Inject
-	protected ItemManager itemManager;
-
-	@Inject
-	protected WorldMapPointManager worldMapPointManager;
-
-	private int npcID;
-	private WorldPoint worldPoint;
+	private final int npcID;
 	private NPC npc;
-	List<ItemRequirement> itemRequirements;
 
 	public NpcTalkStep(QuestHelper questHelper, int npcID, WorldPoint worldPoint, String text, ItemRequirement... itemRequirements)
 	{
-		super(questHelper, text);
+		super(questHelper, worldPoint, text, itemRequirements);
 		this.npcID = npcID;
-		this.worldPoint = worldPoint;
-		this.itemRequirements = Arrays.asList(itemRequirements);
 	}
 
 	@Override
 	public void startUp()
 	{
+		super.startUp();
 		for (NPC npc : client.getNpcs())
 		{
 			if (npcID == npc.getId())
@@ -82,15 +66,14 @@ public class NpcTalkStep extends QuestStep
 				client.setHintArrow(npc);
 			}
 		}
-		worldMapPointManager.add(new QuestHelperWorldMapPoint(worldPoint, getQuestImage()));
 	}
 
 	@Override
 	public void shutDown()
 	{
+		super.shutDown();
 		npc = null;
 		client.clearHintArrow();
-		worldMapPointManager.removeIf(QuestHelperWorldMapPoint.class::isInstance);
 	}
 
 	@Subscribe
@@ -113,6 +96,7 @@ public class NpcTalkStep extends QuestStep
 	}
 
 	@Subscribe
+	@Override
 	public void onGameTick(GameTick event)
 	{
 		if (worldPoint != null
@@ -124,38 +108,9 @@ public class NpcTalkStep extends QuestStep
 	}
 
 	@Override
-	public void makeOverlayHint(PanelComponent panelComponent, QuestHelperPlugin plugin)
-	{
-		super.makeOverlayHint(panelComponent, plugin);
-
-		if (itemRequirements.isEmpty())
-		{
-			return;
-		}
-
-		panelComponent.getChildren().add(LineComponent.builder().left("Required Items:").build());
-		for (ItemRequirement itemRequirement : itemRequirements)
-		{
-			String text = itemRequirement.getQuantity() + " x " + itemManager.getItemComposition(itemRequirement.getId()).getName();
-			Color color;
-			if (itemRequirement.check(client))
-			{
-				color = Color.GREEN;
-			}
-			else
-			{
-				color = Color.RED;
-			}
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left(text)
-				.leftColor(color)
-				.build());
-		}
-	}
-
-	@Override
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
+		super.makeWorldOverlayHint(graphics, plugin);
 		if (!worldPoint.isInScene(client))
 		{
 			return;

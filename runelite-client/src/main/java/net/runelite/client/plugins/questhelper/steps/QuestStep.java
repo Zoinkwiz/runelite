@@ -50,7 +50,7 @@ import net.runelite.client.ui.overlay.components.TitleComponent;
 public abstract class QuestStep implements Module
 {
 	@Inject
-	private Client client;
+	protected Client client;
 
 	@Inject
 	private ClientThread clientThread;
@@ -60,15 +60,15 @@ public abstract class QuestStep implements Module
 
 	@Setter
 	@Getter
-	private String text;
+	protected String text;
 
 	private int currentChoice = 0;
 
 	@Getter
-	private final QuestHelper questHelper;
+	protected final QuestHelper questHelper;
 
 	@Getter
-	public DialogChoiceSteps choices = new DialogChoiceSteps();
+	protected DialogChoiceSteps choices = new DialogChoiceSteps();
 
 	public QuestStep(QuestHelper questHelper, String text)
 	{
