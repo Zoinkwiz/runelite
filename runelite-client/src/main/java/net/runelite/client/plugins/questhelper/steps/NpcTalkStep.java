@@ -26,6 +26,7 @@ package net.runelite.client.plugins.questhelper.steps;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.Collection;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
@@ -96,14 +97,21 @@ public class NpcTalkStep extends DetailedQuestStep
 	}
 
 	@Subscribe
-	@Override
 	public void onGameTick(GameTick event)
 	{
-		if (worldPoint != null
+		if (npc != null
+			&& (client.getHintArrowNpc() == null
+			|| !client.getHintArrowNpc().equals(npc))) {
+			client.setHintArrow(npc);
+		} else if (worldPoint != null
 			&& (client.getHintArrowNpc() == null
 			|| !client.getHintArrowNpc().equals(npc)))
 		{
-			client.setHintArrow(worldPoint);
+			Collection<WorldPoint> localWorldPoints = WorldPoint.toLocalInstance(client, worldPoint);
+			if (localWorldPoints.isEmpty()) {
+				return;
+			}
+			client.setHintArrow(localWorldPoints.iterator().next());
 		}
 	}
 
@@ -111,7 +119,8 @@ public class NpcTalkStep extends DetailedQuestStep
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
 		super.makeWorldOverlayHint(graphics, plugin);
-		if (!worldPoint.isInScene(client))
+		Collection<WorldPoint> localWorldPoints = WorldPoint.toLocalInstance(client, worldPoint);
+		if (localWorldPoints.isEmpty())
 		{
 			return;
 		}

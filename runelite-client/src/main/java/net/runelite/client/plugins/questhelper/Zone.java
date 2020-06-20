@@ -30,10 +30,10 @@ import net.runelite.api.coords.WorldPoint;
 
 public class Zone
 {
-	private int minX;
-	private int maxX;
-	private int minY;
-	private int maxY;
+	private final int minX;
+	private final int maxX;
+	private final int minY;
+	private final int maxY;
 	private int minPlane = 0;
 	private int maxPlane = 2;
 
@@ -76,16 +76,11 @@ public class Zone
 
 	public boolean contains(WorldPoint worldPoint)
 	{
-		if (minX <= worldPoint.getX()
+		return minX <= worldPoint.getX()
 			&& worldPoint.getX() <= maxX
 			&& minY <= worldPoint.getY()
 			&& worldPoint.getY() <= maxY
 			&& minPlane <= worldPoint.getPlane()
-			&& worldPoint.getPlane() <= maxPlane)
-		{
-			return true;
-		}
-
-		return false;
+			&& worldPoint.getPlane() <= maxPlane;
 	}
 }

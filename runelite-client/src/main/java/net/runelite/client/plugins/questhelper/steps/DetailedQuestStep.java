@@ -69,21 +69,16 @@ public class DetailedQuestStep extends QuestStep
 	@Getter
 	public DialogChoiceSteps choices = new DialogChoiceSteps();
 
-	public DetailedQuestStep(QuestHelper questHelper, String text)
+	public DetailedQuestStep(QuestHelper questHelper, String text, ItemRequirement... itemRequirements)
 	{
 		super(questHelper, text);
+		this.itemRequirements.addAll(Arrays.asList(itemRequirements));
 	}
 
 	public DetailedQuestStep(QuestHelper questHelper, WorldPoint worldPoint, String text, ItemRequirement... itemRequirements)
 	{
 		super(questHelper, text);
 		this.worldPoint = worldPoint;
-		this.itemRequirements.addAll(Arrays.asList(itemRequirements));
-	}
-
-	public DetailedQuestStep(QuestHelper questHelper, String text, ItemRequirement... itemRequirements)
-	{
-		super(questHelper, text);
 		this.itemRequirements.addAll(Arrays.asList(itemRequirements));
 	}
 
@@ -98,6 +93,7 @@ public class DetailedQuestStep extends QuestStep
 		if (worldPoint != null)
 		{
 			worldMapPointManager.add(new QuestHelperWorldMapPoint(worldPoint, getQuestImage()));
+			client.setHintArrow(worldPoint);
 		}
 		addItemTiles();
 	}
@@ -108,15 +104,6 @@ public class DetailedQuestStep extends QuestStep
 		worldMapPointManager.removeIf(QuestHelperWorldMapPoint.class::isInstance);
 		tileHighlights.clear();
 		client.clearHintArrow();
-	}
-
-	@Subscribe
-	public void onGameTick(GameTick event)
-	{
-		if (worldPoint != null)
-		{
-			client.setHintArrow(worldPoint);
-		}
 	}
 
 	public void makeOverlayHint(PanelComponent panelComponent, QuestHelperPlugin plugin)
@@ -203,19 +190,22 @@ public class DetailedQuestStep extends QuestStep
 		{
 			for (Tile tile : lineOfTiles)
 			{
-				List<TileItem> items = tile.getGroundItems();
-				if(items != null)
+				if(tile != null)
 				{
-					for (TileItem item : items)
+					List<TileItem> items = tile.getGroundItems();
+					if (items != null)
 					{
-						for (ItemRequirement itemRequirement : itemRequirements)
+						for (TileItem item : items)
 						{
-							if (item.getId() == itemRequirement.getId())
+							for (ItemRequirement itemRequirement : itemRequirements)
 							{
-								tileHighlights.computeIfAbsent(item.getId(), k -> new ArrayList<>());
-								if (!tileHighlights.get(item.getId()).contains(tile))
+								if (item.getId() == itemRequirement.getId())
 								{
-									tileHighlights.get(item.getId()).add(tile);
+									tileHighlights.computeIfAbsent(item.getId(), k -> new ArrayList<>());
+									if (!tileHighlights.get(item.getId()).contains(tile))
+									{
+										tileHighlights.get(item.getId()).add(tile);
+									}
 								}
 							}
 						}

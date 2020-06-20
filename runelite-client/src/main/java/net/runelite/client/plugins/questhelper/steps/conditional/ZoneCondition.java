@@ -25,9 +25,12 @@
 package net.runelite.client.plugins.questhelper.steps.conditional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import net.runelite.api.Client;
+import net.runelite.api.Player;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.questhelper.Zone;
 
 public class ZoneCondition extends ConditionForStep
@@ -53,12 +56,18 @@ public class ZoneCondition extends ConditionForStep
 	@Override
 	public boolean checkCondition(Client client)
 	{
-		for (Zone zone : zones)
+		Player player = client.getLocalPlayer();
+		if (player != null)
 		{
-			if (client.getLocalPlayer() != null && zone.contains(client.getLocalPlayer().getWorldLocation()))
+			WorldPoint worldPoint = WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation());
+
+			for (Zone zone : zones)
 			{
-				// Check succeeded if check is to see if in zone, failed if not
-				return checkInZone;
+				if (zone.contains(worldPoint))
+				{
+					// Check succeeded if check is to see if in zone, failed if not
+					return checkInZone;
+				}
 			}
 		}
 		return !checkInZone;

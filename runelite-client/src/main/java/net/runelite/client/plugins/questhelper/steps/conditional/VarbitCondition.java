@@ -66,11 +66,11 @@ public class VarbitCondition extends ConditionForStep
 	{
 		if (operation == Operation.EQUAL)
 		{
-			return client.getVarbitValue(varbitId) <= value;
+			return client.getVarbitValue(varbitId) == value;
 		}
 		else if (operation == Operation.LESS_EQUAL)
 		{
-			return client.getVarbitValue(varbitId) == value;
+			return client.getVarbitValue(varbitId) <= value;
 		}
 
 		else if (operation == Operation.GREATER_EQUAL)

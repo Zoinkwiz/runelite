@@ -29,26 +29,37 @@ import java.util.Collections;
 import java.util.List;
 import net.runelite.api.Client;
 
-public class Conditions
+public class Conditions extends ConditionForStep
 {
-	List<ConditionForStep> conditions;
+	protected List<ConditionForStep> conditions;
+	protected boolean isAnd;
 
 	public Conditions(ConditionForStep... conditions) {
 		this.conditions = new ArrayList<>();
 		Collections.addAll(this.conditions, conditions);
+		isAnd = true;
 	}
 
-	public void addCondition(ConditionForStep condition) {
-		conditions.add(condition);
+	public Conditions(boolean isAnd, ConditionForStep... conditions) {
+		this.conditions = new ArrayList<>();
+		Collections.addAll(this.conditions, conditions);
+		this.isAnd = isAnd;
 	}
 
-	public boolean checkConditions(Client client) {
+	@Override
+	public boolean checkCondition(Client client) {
 		for (ConditionForStep condition : conditions)
 		{
 			if(!condition.checkCondition(client)) {
-				return false;
+				if (isAnd) {
+					return false;
+				}
+			} else  {
+				if (!isAnd) {
+					return true;
+				}
 			}
 		}
-		return true;
+		return isAnd;
 	}
 }

@@ -28,11 +28,9 @@ import com.google.inject.Inject;
 import java.awt.Graphics2D;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import net.runelite.api.Client;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
 import net.runelite.client.plugins.questhelper.steps.conditional.ConditionForStep;
@@ -95,7 +93,7 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 	{
 		for (Conditions conditions : steps.keySet())
 		{
-			if (conditions != null && conditions.checkConditions(client))
+			if (conditions != null && conditions.checkCondition(client))
 			{
 				startUpStep(steps.get(conditions));
 				return;
