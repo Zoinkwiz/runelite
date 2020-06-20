@@ -3,10 +3,12 @@ package net.runelite.client.plugins.questhelper.steps;
 import com.google.common.primitives.Ints;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import net.runelite.api.GameObject;
 import net.runelite.api.GameState;
 import net.runelite.api.ObjectComposition;
+import static net.runelite.api.Perspective.SCENE_SIZE;
 import net.runelite.api.Point;
 import net.runelite.api.Tile;
 import net.runelite.api.TileObject;
@@ -19,6 +21,8 @@ import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GroundObjectDespawned;
 import net.runelite.api.events.GroundObjectSpawned;
+import net.runelite.api.events.WallObjectDespawned;
+import net.runelite.api.events.WallObjectSpawned;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.questhelper.ItemRequirement;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
@@ -32,6 +36,7 @@ public class ObjectStep extends DetailedQuestStep
 {
 	private final int objectID;
 	private TileObject object;
+	private boolean highlightAll = false;
 
 	private int iconItemID = -1;
 
@@ -41,6 +46,14 @@ public class ObjectStep extends DetailedQuestStep
 	{
 		super(questHelper, worldPoint, text, itemRequirements);
 		this.objectID = objectID;
+		this.highlightAll = false;
+	}
+
+	public ObjectStep(QuestHelper questHelper, int objectID, WorldPoint worldPoint, String text, boolean highlightAll, ItemRequirement... itemRequirements)
+	{
+		super(questHelper, worldPoint, text, itemRequirements);
+		this.highlightAll = highlightAll;
+		this.objectID = objectID;
 	}
 
 	@Override
@@ -48,20 +61,38 @@ public class ObjectStep extends DetailedQuestStep
 	{
 		super.startUp();
 
-		LocalPoint localPoint = LocalPoint.fromWorld(client, worldPoint);
-		if (localPoint == null)
+		if (worldPoint != null)
 		{
-			return;
-		}
+			Collection<WorldPoint> localWorldPoints = WorldPoint.toLocalInstance(client, worldPoint);
 
-		Tile tile = client.getScene().getTiles()[client.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()];
-		for (GameObject object : tile.getGameObjects())
-		{
-			handleObjects(object);
-		}
+			for (WorldPoint point : localWorldPoints)
+			{
+				LocalPoint localPoint = LocalPoint.fromWorld(client, point);
+				if (localPoint == null)
+				{
+					return;
+				}
 
-		handleObjects(tile.getDecorativeObject());
-		handleObjects(tile.getGroundObject());
+				Tile tile = client.getScene().getTiles()[client.getPlane()][localPoint.getSceneX()][localPoint.getSceneY()];
+				if (tile != null)
+				{
+					for (GameObject object : tile.getGameObjects())
+					{
+						handleObjects(object);
+					}
+
+					handleObjects(tile.getDecorativeObject());
+					handleObjects(tile.getGroundObject());
+					handleObjects(tile.getWallObject());
+				}
+			}
+		}
+	}
+
+	@Override
+	public void shutDown() {
+		super.shutDown();
+		this.objects.clear();
 	}
 
 	public void addIcon(int iconItemID) {
@@ -125,6 +156,22 @@ public class ObjectStep extends DetailedQuestStep
 		}
 	}
 
+	@Subscribe
+	public void onWallObjectSpawned(WallObjectSpawned event)
+	{
+		handleObjects(event.getWallObject());
+	}
+
+	@Subscribe
+	public void onWallObjectDespawned(WallObjectDespawned event)
+	{
+		if (event.getWallObject().equals(object))
+		{
+			object = null;
+			client.clearHintArrow();
+		}
+	}
+
 	@Override
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
@@ -155,16 +202,25 @@ public class ObjectStep extends DetailedQuestStep
 			return;
 		}
 
+		Collection<WorldPoint> localWorldPoints = null;
+		if (worldPoint != null)
+		{
+			localWorldPoints = WorldPoint.toLocalInstance(client, worldPoint);
+		}
+
 		if (object.getId() == objectID)
 		{
-			if (object.getWorldLocation().equals(worldPoint))
+			if (localWorldPoints != null && localWorldPoints.contains(object.getWorldLocation()))
 			{
 				this.object = object;
 				this.objects.add(object);
-				client.setHintArrow(worldPoint);
+				client.setHintArrow(object.getWorldLocation());
 				return;
 			}
-			this.objects.add(object);
+			if (highlightAll)
+			{
+				this.objects.add(object);
+			}
 		}
 
 		// Check impostors
@@ -173,12 +229,15 @@ public class ObjectStep extends DetailedQuestStep
 
 		if (impostorIds != null && Ints.contains(comp.getImpostorIds(), objectID))
 		{
-			if (object.getWorldLocation().equals(worldPoint))
+			if (localWorldPoints.contains(object.getWorldLocation()))
 			{
 				this.object = object;
-				client.setHintArrow(worldPoint);    //TODO: better object arrows, probably hydrox's thing
+				client.setHintArrow(object.getWorldLocation());    //TODO: better object arrows, probably hydrox's thing
 			}
-			this.objects.add(object);
+			if (highlightAll)
+			{
+				this.objects.add(object);
+			}
 		}
 	}
 }
