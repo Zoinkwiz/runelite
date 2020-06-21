@@ -279,7 +279,7 @@ public class EaglesPeak extends BasicQuestHelper
 		threatenKebbit = new NpcTalkStep(this, NpcID.KEBBIT, new WorldPoint(1971, 4880, 2), "Threaten the Kebbit that appears. If the kebbit's gone, re-inspect the opening.");
 		threatenKebbit.addDialogStep("Taunt the kebbit.");
 
-		pickupSilverFeather = new ObjectStep(this, ObjectID.OPENING, new WorldPoint(1971, 4886, 2), "Pick up the silver Feather. If it's despawned, inspect the opening to get it.");
+		pickupSilverFeather = new ObjectStep(this, ObjectID.OPENING, new WorldPoint(1971, 4886, 2), "Pick up the silver feather. If it's despawned, inspect the opening to get it.");
 
 		enterGoldRoom = new ObjectStep(this, ObjectID.TUNNEL_19897, new WorldPoint(2023, 4982, 3), "Enter the tunnel in the north east of the main cavern.");
 
@@ -369,6 +369,13 @@ public class EaglesPeak extends BasicQuestHelper
 		allSteps.add(new PanelDetails("Go to Eagles' Peak", new ArrayList<>(Arrays.asList(inspectBooks, clickBook, useFeatherOnDoor))));
 		allSteps.add(new PanelDetails("In Eagles' Peak", new ArrayList<>(Arrays.asList(enterPeak, shoutAtNickolaus, pickupFeathers))));
 		allSteps.add(new PanelDetails("Make a disguise", new ArrayList<>(Arrays.asList(goToFancyStore, speakAsyffAgain)), yellowDye, coins, tar, tenEagleFeathers));
+		allSteps.add(new PanelDetails("Return to Eagles' Peak", new ArrayList<>(Arrays.asList(returnToEaglesPeak)), fakeBeak, eagleCape));
+		allSteps.add(new PanelDetails("Get the bronze feather", new ArrayList<>(Arrays.asList(enterBronzeRoom, attemptToTakeBronzeFeather, winch1, grabBronzeFeather))));
+		allSteps.add(new PanelDetails("Get the silver feather", new ArrayList<>(Arrays.asList(enterSilverRoom, inspectSilverPedestal, inspectRocks1, inspectRocks2, inspectOpening, threatenKebbit, pickupSilverFeather))));
+		allSteps.add(new PanelDetails("Get the golden feather", new ArrayList<>(Arrays.asList(enterGoldRoom, collectFeed, pullLever1Down, fillFeeder1, fillFeeder2, pullLever2Down, pushLever1Up, fillFeeder4, pullLever3Down, fillFeeder5,
+			pullLever4Down, fillFeeder6, fillFeeder4Again, grabGoldFeather))));
+		allSteps.add(new PanelDetails("Free Nickolaus", new ArrayList<>(Arrays.asList(useFeathersOnStoneDoor, sneakPastEagle, speakToNickolaus))));
+		allSteps.add(new PanelDetails("Learn how to catch ferrets", new ArrayList<>(Arrays.asList(speakToNickolausInTheCamp, speakToCharlieAgain))));
 		return allSteps;
 	}
 
