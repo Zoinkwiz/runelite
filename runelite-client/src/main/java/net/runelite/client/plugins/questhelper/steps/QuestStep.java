@@ -122,6 +122,10 @@ public abstract class QuestStep implements Module
 	{
 	}
 
+	public QuestStep getActiveStep() {
+		return this;
+	}
+
 	public BufferedImage getQuestImage()
 	{
 		return spriteManager.getSprite(SpriteID.TAB_QUESTS, 0);

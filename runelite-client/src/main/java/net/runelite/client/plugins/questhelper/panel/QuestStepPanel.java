@@ -24,6 +24,8 @@
  */
 package net.runelite.client.plugins.questhelper.panel;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import net.runelite.client.plugins.questhelper.ItemRequirement;
 import net.runelite.client.plugins.questhelper.steps.QuestStep;
 import net.runelite.client.ui.ColorScheme;
@@ -39,32 +41,42 @@ public class QuestStepPanel extends JPanel
 
 
     private final JPanel headerPanel = new JPanel();
+	private final JLabel headerLabel = new JLabel();
 	private final JPanel bodyPanel = new JPanel();
 
-    public QuestStepPanel(PanelDetails panelDetails) {
+	private QuestStep currentlyHighlighted = null;
+
+	private final HashMap<QuestStep, JLabel> steps = new HashMap<>();
+
+    public QuestStepPanel(PanelDetails panelDetails, QuestStep currentStep)
+	{
+		System.out.println(currentStep.getText());
 		setLayout(new BorderLayout(0, 1));
 		setBorder(new EmptyBorder(5, 0, 0, 0));
 
-		JLabel headerLabel = new JLabel();
 		headerLabel.setText(panelDetails.getHeader());
-		headerLabel.setFont(FontManager.getRunescapeSmallFont());
-		headerLabel.setForeground(Color.WHITE);
+		headerLabel.setFont(FontManager.getRunescapeBoldFont());
+
 		headerLabel.setMinimumSize(new Dimension(1, headerLabel.getPreferredSize().height));
 
 		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.X_AXIS));
 		headerPanel.setBorder(new EmptyBorder(7, 7, 7, 7));
-		headerPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
+		if (panelDetails.getSteps().contains(currentStep))
+		{
+			headerLabel.setForeground(Color.BLACK);
+			headerPanel.setBackground(ColorScheme.BRAND_ORANGE);
+		}
+		else
+		{
+			headerLabel.setForeground(Color.WHITE);
+			headerPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
+		}
 		headerPanel.add(Box.createRigidArea(new Dimension(TITLE_PADDING, 0)));
 		headerPanel.add(headerLabel);
 
 		bodyPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		bodyPanel.setLayout(new BorderLayout());
 		bodyPanel.setBorder(new EmptyBorder(10, 5, 10, 5));
-
-		JLabel body = new JLabel();
-		body.setHorizontalAlignment(SwingConstants.LEFT);
-		body.setVerticalAlignment(SwingConstants.TOP);
-		StringBuilder text = new StringBuilder();
 
 		if(!panelDetails.getItemRequirements().isEmpty()) {
 			JPanel questItemRequirementsPanel = new JPanel();
@@ -108,19 +120,72 @@ public class QuestStepPanel extends JPanel
 			bodyPanel.add(questItemRequirementsPanel, BorderLayout.NORTH);
 		}
 
+		JPanel questStepsPanel = new JPanel();
+		questStepsPanel.setLayout(new BoxLayout(questStepsPanel, BoxLayout.Y_AXIS));
+		questStepsPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
 		for(QuestStep step : panelDetails.getSteps())
 		{
-			if(!text.toString().equals("")) {
-				text.append("<br><br>");
+			JLabel questStepLabel = new JLabel();
+			questStepLabel.setLayout(new BorderLayout());
+			questStepLabel.setBorder(new EmptyBorder(0, 0, 10, 0));
+			questStepLabel.setHorizontalAlignment(SwingConstants.LEFT);
+			questStepLabel.setVerticalAlignment(SwingConstants.TOP);
+
+			StringBuilder text = new StringBuilder();
+
+//			if(!text.toString().equals("")) {
+//				text.append("<br><br>");
+//			}
+			if(step.equals(currentStep)) {
+				questStepLabel.setForeground(ColorScheme.BRAND_ORANGE);
 			}
 			text.append(step.getText());
+			questStepLabel.setText("<html><body style = 'text-align:left'>" + text + "</body></html>");
+
+			steps.put(step, questStepLabel);
+			questStepsPanel.add(questStepLabel);
 		}
-		body.setText("<html><body style = 'text-align:left'>" + text + "</body></html>");
-		bodyPanel.add(body, BorderLayout.CENTER);
+
+		bodyPanel.add(questStepsPanel, BorderLayout.CENTER);
 
 		add(headerPanel, BorderLayout.NORTH);
 		add(bodyPanel, BorderLayout.CENTER);
+
+		if (!panelDetails.getSteps().contains(currentStep))
+		{
+			collapse();
+		}
     }
+
+    public ArrayList<QuestStep> getSteps() {
+    	return new ArrayList<>(steps.keySet());
+	}
+
+    public void updateHighlight(QuestStep currentStep) {
+    	if (currentlyHighlighted != null)
+		{
+			steps.get(currentlyHighlighted).setForeground(Color.WHITE);
+		} else {
+			headerLabel.setForeground(Color.BLACK);
+			headerPanel.setBackground(ColorScheme.BRAND_ORANGE);
+		}
+		steps.get(currentStep).setForeground(ColorScheme.BRAND_ORANGE);
+		currentlyHighlighted = currentStep;
+	}
+
+	public void removeHighlight() {
+    	if (currentlyHighlighted != null) {
+    		headerLabel.setForeground(Color.WHITE);
+			if (isCollapsed())
+			{
+				applyDimmer(false, headerPanel);
+			}
+    		headerPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
+    		steps.get(currentlyHighlighted).setForeground(Color.WHITE);
+    		currentlyHighlighted = null;
+		}
+	}
 
 	void collapse()
 	{

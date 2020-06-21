@@ -76,6 +76,10 @@ public abstract class BasicQuestHelper extends QuestHelper
 
 	public abstract ArrayList<ItemRequirement> getItemRequirements();
 
+	public ArrayList<ItemRequirement> getItemRecommended() {
+		return null;
+	}
+
 	public String getCombatRequirements() {
 		return "None";
 	};

@@ -151,6 +151,11 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 	}
 
 	@Override
+	public QuestStep getActiveStep() {
+		return currentStep.getActiveStep();
+	}
+
+	@Override
 	public Collection<QuestStep> getSteps()
 	{
 		return steps.values();

@@ -77,7 +77,7 @@ public class BearYourSoul extends BasicQuestHelper
 	}
 
 	public void setupSteps() {
-		findSoulJourneyAndRead = new DetailedQuestStep(this, new WorldPoint(1632,3808,0), "Go to the Arceuus library and find The Soul journey book in one of the bookcases, then read it. You can ask Biblia for help locating it, or make use of the Runelite Arceuus Library plugin.");
+		findSoulJourneyAndRead = new DetailedQuestStep(this, new WorldPoint(1632,3808,0), "Go to the Arceuus library and find The Soul journey book in one of the bookcases, then read it. You can ask Biblia for help locating it, or make use of the Runelite Kourend Library plugin.");
 
 		talkToAretha = new NpcTalkStep(this, NpcID.ARETHA, new WorldPoint(1814, 3851, 0),
 			"Talk to Aretha at the Soul Altar.");
@@ -110,7 +110,7 @@ public class BearYourSoul extends BasicQuestHelper
 		allSteps.add(new PanelDetails("Find the Soul journey book", new ArrayList<>(Arrays.asList(findSoulJourneyAndRead))));
 		allSteps.add(new PanelDetails("Talk to Aretha", new ArrayList<>(Arrays.asList(talkToAretha))));
 		allSteps.add(new PanelDetails("Dig up the Soul Bearer", new ArrayList<>(Arrays.asList(arceuusChurchDig)), spade));
-		allSteps.add(new PanelDetails("Have the Soul Bearer repaired", new ArrayList<>(Arrays.asList(goToTaverleyDungeon, speakKeyMaster)), dustyKeyOr70AgilOrKeyMasterTeleport));
+		allSteps.add(new PanelDetails("Have the Soul Bearer repaired", new ArrayList<>(Arrays.asList(goToTaverleyDungeon, enterCaveToKeyMaster, speakKeyMaster)), dustyKeyOr70AgilOrKeyMasterTeleport));
 		return allSteps;
 	}
 

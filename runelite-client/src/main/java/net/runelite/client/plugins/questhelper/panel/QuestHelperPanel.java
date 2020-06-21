@@ -39,6 +39,7 @@ import net.runelite.api.Client;
 import net.runelite.client.plugins.questhelper.ItemRequirement;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
 import net.runelite.client.plugins.questhelper.questhelpers.BasicQuestHelper;
+import net.runelite.client.plugins.questhelper.steps.QuestStep;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.PluginErrorPanel;
@@ -68,12 +69,13 @@ class QuestHelperPanel extends PluginPanel
 
     private final JPanel overviewPanel = new JPanel();
 	private final JPanel questItemRequirementsListPanel = new JPanel();
+	private final JPanel questItemRecommendedListPanel = new JPanel();
 	private final JPanel questCombatRequirementsListPanel = new JPanel();
 
-    private final JPanel questStepsPanel = new JPanel();
+    private final JPanel questStepsContainer = new JPanel();
 	private final JLabel questNameLabel = new JLabel();
 
-    private final List<QuestStepPanel> stepPanels = new ArrayList<>();
+    private final List<QuestStepPanel> questStepPanelList = new ArrayList<>();
 
 
 	private static final ImageIcon COLLAPSE_ICON;
@@ -128,6 +130,8 @@ class QuestHelperPanel extends PluginPanel
 		overviewPanel.setLayout(new BorderLayout());
 		overviewPanel.setVisible(false);
 
+		/* Item requirements */
+
 		JPanel questItemRequirementsPanel = new JPanel();
 		questItemRequirementsPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		questItemRequirementsPanel.setLayout(new BorderLayout());
@@ -149,6 +153,32 @@ class QuestHelperPanel extends PluginPanel
 
 		questItemRequirementsPanel.add(questItemRequirementsHeader, BorderLayout.NORTH);
 		questItemRequirementsPanel.add(questItemRequirementsListPanel, BorderLayout.CENTER);
+
+		/* Recommended Items */
+
+		JPanel questItemRecommendedPanel = new JPanel();
+		questItemRecommendedPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		questItemRecommendedPanel.setLayout(new BorderLayout());
+		questItemRecommendedPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+
+		JPanel questItemRecommendedHeader = new JPanel();
+		questItemRecommendedHeader.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		questItemRecommendedHeader.setLayout(new BorderLayout());
+		questItemRecommendedHeader.setBorder(new EmptyBorder(5, 5, 5, 10));
+
+		JLabel questItemRecommended = new JLabel();
+		questItemRecommended.setForeground(Color.WHITE);
+		questItemRecommended.setText("Recommended items:");
+		questItemRecommended.setMinimumSize(new Dimension(1, questItemRecommendedHeader.getPreferredSize().height));
+		questItemRecommendedHeader.add(questItemRecommended, BorderLayout.NORTH);
+
+		questItemRecommendedListPanel.setLayout(new BorderLayout());
+		questItemRecommendedListPanel.setBorder(new EmptyBorder(10, 5, 10, 5));
+
+		questItemRecommendedPanel.add(questItemRecommendedHeader, BorderLayout.NORTH);
+		questItemRecommendedPanel.add(questItemRecommendedListPanel, BorderLayout.CENTER);
+
+		/* Combat requirements */
 
 		JPanel questCombatRequirementsPanel = new JPanel();
 		questCombatRequirementsPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -173,7 +203,8 @@ class QuestHelperPanel extends PluginPanel
 		questCombatRequirementsPanel.add(questCombatRequirementsListPanel, BorderLayout.CENTER);
 
 		overviewPanel.add(questItemRequirementsPanel, BorderLayout.NORTH);
-		overviewPanel.add(questCombatRequirementsPanel, BorderLayout.CENTER);
+		overviewPanel.add(questItemRecommendedPanel, BorderLayout.CENTER);
+		overviewPanel.add(questCombatRequirementsPanel, BorderLayout.SOUTH);
 
 		/* Layout */
         final JPanel layoutPanel = new JPanel();
@@ -189,16 +220,18 @@ class QuestHelperPanel extends PluginPanel
         titlePanel.add(title, BorderLayout.WEST);
 
         /* Container for quest steps */
-        questStepsPanel.setLayout(new BoxLayout(questStepsPanel, BoxLayout.Y_AXIS));
+        questStepsContainer.setLayout(new BoxLayout(questStepsContainer, BoxLayout.Y_AXIS));
 
 		layoutPanel.add(titlePanel);
 		layoutPanel.add(actionsContainer);
 		layoutPanel.add(overviewPanel);
-        layoutPanel.add(questStepsPanel);
+        layoutPanel.add(questStepsContainer);
     }
 
     public void addQuest(BasicQuestHelper quest) {
         ArrayList<PanelDetails> steps = quest.getPanels();
+
+        QuestStep currentStep = quest.getCurrentStep().getActiveStep();
 
         questNameLabel.setText(quest.getQuest().getName());
 		actionsContainer.setVisible(true);
@@ -207,9 +240,9 @@ class QuestHelperPanel extends PluginPanel
 		overviewPanel.setVisible(true);
 
 		steps.forEach((step) -> {
-			QuestStepPanel newStep = new QuestStepPanel(step);
-			stepPanels.add(newStep);
-			questStepsPanel.add(newStep);
+			QuestStepPanel newStep = new QuestStepPanel(step, currentStep);
+			questStepPanelList.add(newStep);
+			questStepsContainer.add(newStep);
 			newStep.addMouseListener(new MouseAdapter()
 			{
 				@Override
@@ -235,17 +268,37 @@ class QuestHelperPanel extends PluginPanel
         revalidate();
     }
 
+    public void updateHighlight(QuestStep newStep)
+	{
+		questStepPanelList.forEach(panel -> {
+			if (panel.getSteps().contains(newStep))
+			{
+				panel.updateHighlight(newStep);
+			}
+			else
+			{
+				panel.removeHighlight();
+			}
+		});
+
+		repaint();
+		revalidate();
+	}
+
     public void removeQuest() {
 		actionsContainer.setVisible(false);
 		overviewPanel.setVisible(false);
-        questStepsPanel.removeAll();
+        questStepsContainer.removeAll();
 		questItemRequirementsListPanel.removeAll();
+		questItemRecommendedListPanel.removeAll();
         repaint();
         revalidate();
     }
 
     public void setupQuestRequirements(BasicQuestHelper quest) {
 		ArrayList<ItemRequirement> itemRequirements = quest.getItemRequirements();
+
+		/* Required items */
 		JLabel itemLabel = new JLabel();
 		itemLabel.setForeground(Color.GRAY);
 		StringBuilder text = new StringBuilder();
@@ -257,15 +310,39 @@ class QuestHelperPanel extends PluginPanel
 			text.append(itemRequirement.getQuantity()).append(" x ").append(itemRequirement.getName());
 		}
 
-		itemLabel.setText("<html><body style = 'text-align:left'>" + text + "</body></html>");
-
 		questItemRequirementsListPanel.add(itemLabel);
 
+		itemLabel.setText("<html><body style = 'text-align:left'>" + text + "</body></html>");
+
+		/* Recommended items */
+		ArrayList<ItemRequirement> itemRecommended = quest.getItemRecommended();
+		JLabel itemRecommendedLabel = new JLabel();
+		itemRecommendedLabel.setForeground(Color.GRAY);
+		StringBuilder textRecommended = new StringBuilder();
+		if (itemRecommended == null) {
+			textRecommended.append("None");
+		} else
+		{
+			for (ItemRequirement itemRequirement : itemRecommended)
+			{
+				if (!textRecommended.toString().equals(""))
+				{
+					textRecommended.append("<br>");
+				}
+				textRecommended.append(itemRequirement.getQuantity()).append(" x ").append(itemRequirement.getName());
+			}
+		}
+
+		itemRecommendedLabel.setText("<html><body style = 'text-align:left'>" + textRecommended + "</body></html>");
+
+		questItemRecommendedListPanel.add(itemRecommendedLabel);
+
+		/* Combat requirements */
 		JLabel combatLabel = new JLabel();
 		combatLabel.setForeground(Color.GRAY);
 		if (quest.getCombatRequirements() == null)
 		{
-			combatLabel.setText("<html><body style = 'text-align:left'>none</body></html>");
+			combatLabel.setText("<html><body style = 'text-align:left'>None</body></html>");
 		} else
 		{
 			combatLabel.setText("<html><body style = 'text-align:left'>" + quest.getCombatRequirements() + "</body></html>");
@@ -298,7 +375,7 @@ class QuestHelperPanel extends PluginPanel
 	{
 		boolean isAllCollapsed = isAllCollapsed();
 
-		for (QuestStepPanel box : stepPanels)
+		for (QuestStepPanel box : questStepPanelList)
 		{
 			if (isAllCollapsed)
 			{
@@ -319,8 +396,8 @@ class QuestHelperPanel extends PluginPanel
 
 	private boolean isAllCollapsed()
 	{
-		return stepPanels.stream()
+		return questStepPanelList.stream()
 			.filter(QuestStepPanel::isCollapsed)
-			.count() == stepPanels.size();
+			.count() == questStepPanelList.size();
 	}
 }

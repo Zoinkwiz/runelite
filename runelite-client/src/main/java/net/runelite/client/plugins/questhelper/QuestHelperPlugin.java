@@ -46,6 +46,7 @@ import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Quest;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.VarbitChanged;
@@ -60,6 +61,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.questhelper.panel.QuestHelperPanel;
 import net.runelite.client.plugins.questhelper.questhelpers.BasicQuestHelper;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
+import net.runelite.client.plugins.questhelper.steps.QuestStep;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -114,7 +116,10 @@ public class QuestHelperPlugin extends Plugin
 	@Getter
 	private QuestHelper selectedQuest = null;
 
+	private QuestStep lastStep = null;
+
 	private Map<String, QuestHelper> quests;
+
 
 	@Inject
 	SpriteManager spriteManager;
@@ -150,6 +155,20 @@ public class QuestHelperPlugin extends Plugin
 		clientToolbar.removeNavigation(navButton);
 		quests = null;
 		shutDownQuest();
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick event)
+	{
+		if (selectedQuest != null)
+		{
+			QuestStep currentStep = selectedQuest.getCurrentStep().getActiveStep();
+			if (currentStep != null && currentStep != lastStep)
+			{
+				lastStep = currentStep;
+				panel.updateHighlight(currentStep);
+			}
+		}
 	}
 
 	@Subscribe
