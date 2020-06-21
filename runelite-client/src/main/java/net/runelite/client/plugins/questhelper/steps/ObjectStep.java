@@ -89,6 +89,7 @@ public class ObjectStep extends DetailedQuestStep
 		}
 	}
 
+
 	@Override
 	public void shutDown() {
 		super.shutDown();
@@ -100,11 +101,14 @@ public class ObjectStep extends DetailedQuestStep
 	}
 
 	@Subscribe
+	@Override
 	public void onGameStateChanged(GameStateChanged event)
 	{
+		super.onGameStateChanged(event);
 		if (event.getGameState() == GameState.LOADING)
 		{
 			object = null;
+			objects.clear();
 		}
 	}
 
@@ -180,11 +184,16 @@ public class ObjectStep extends DetailedQuestStep
 		{
 			return;
 		}
+
+		LocalPoint playerLocation = client.getLocalPlayer().getLocalLocation();
+
 		Point mousePosition = client.getMouseCanvasPosition();
 		for (TileObject tileObject : objects)
 		{
-			OverlayUtil.renderHoverableArea(graphics, tileObject.getClickbox(), mousePosition,
-				CLICKBOX_FILL_COLOR, CLICKBOX_BORDER_COLOR, CLICKBOX_HOVER_BORDER_COLOR);
+			if(tileObject.getPlane() == client.getPlane())
+			{
+				OverlayUtil.renderHoverableArea(graphics, tileObject.getClickbox(), mousePosition,
+					CLICKBOX_FILL_COLOR, CLICKBOX_BORDER_COLOR, CLICKBOX_HOVER_BORDER_COLOR);
 //			if(this.iconItemID != -1) {
 //				LocalPoint lp = LocalPoint.fromWorld(client, worldPoint);
 //				if(lp == null) {
@@ -192,6 +201,7 @@ public class ObjectStep extends DetailedQuestStep
 //				}
 //				OverlayUtil.renderTileOverlay(client, graphics, lp, itemManager.getImage(this.iconItemID), Color.CYAN);
 //			}
+			}
 		}
 	}
 

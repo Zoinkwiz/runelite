@@ -34,11 +34,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import lombok.Getter;
+import net.runelite.api.GameState;
 import net.runelite.api.Perspective;
 import net.runelite.api.Tile;
 import net.runelite.api.TileItem;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemDespawned;
 import net.runelite.api.events.ItemSpawned;
@@ -65,6 +67,8 @@ public class DetailedQuestStep extends QuestStep
 	protected WorldPoint worldPoint;
 	protected List<ItemRequirement> itemRequirements = new ArrayList<>();
 	protected HashMap<Integer, List<Tile>> tileHighlights = new HashMap<>();
+
+	protected static final int MAX_DISTANCE = 2350;
 
 	@Getter
 	public DialogChoiceSteps choices = new DialogChoiceSteps();
@@ -160,6 +164,15 @@ public class DetailedQuestStep extends QuestStep
 	}
 
 	@Subscribe
+	public void onGameStateChanged(final GameStateChanged event)
+	{
+		if (event.getGameState() == GameState.LOADING)
+		{
+			tileHighlights.clear();
+		}
+	}
+
+	@Subscribe
 	public void onItemDespawned(ItemDespawned itemDespawned)
 	{
 		List<TileItem> items = itemDespawned.getTile().getGroundItems();
@@ -173,13 +186,13 @@ public class DetailedQuestStep extends QuestStep
 					itemStillOnTile = true;
 				}
 			}
-			if (!itemStillOnTile)
+		}
+		if (!itemStillOnTile)
+		{
+			List<Tile> currentTile = tileHighlights.get(itemDespawned.getItem().getId());
+			if (currentTile != null)
 			{
-				List<Tile> currentTile = tileHighlights.get(itemDespawned.getItem().getId());
-				if (currentTile != null)
-				{
-					currentTile.remove(itemDespawned.getTile());
-				}
+				currentTile.remove(itemDespawned.getTile());
 			}
 		}
 	}
@@ -218,6 +231,7 @@ public class DetailedQuestStep extends QuestStep
 	@Override
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
+		LocalPoint playerLocation = client.getLocalPlayer().getLocalLocation();
 		itemRequirements.forEach(itemRequirement -> {
 			if (!itemRequirement.check(client))
 			{
@@ -226,18 +240,22 @@ public class DetailedQuestStep extends QuestStep
 				{
 					for (Tile tile : tiles)
 					{
-						final LocalPoint location = tile.getLocalLocation();
+						LocalPoint location = tile.getLocalLocation();
+
 						if (location == null)
 						{
-							return;
+							continue;
+						}
+
+						if (location.distanceTo(playerLocation) > MAX_DISTANCE) {
+							continue;
 						}
 
 						Polygon poly = Perspective.getCanvasTilePoly(client, location);
 						if (poly == null)
 						{
-							return;
+							continue;
 						}
-
 						OverlayUtil.renderPolygon(graphics, poly, Color.CYAN);
 					}
 				}
