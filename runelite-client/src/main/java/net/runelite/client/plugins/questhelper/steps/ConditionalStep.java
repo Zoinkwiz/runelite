@@ -26,13 +26,17 @@ package net.runelite.client.plugins.questhelper.steps;
 
 import com.google.inject.Inject;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import net.runelite.api.ChatMessageType;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
+import net.runelite.client.plugins.questhelper.steps.conditional.ChatMessageCondition;
 import net.runelite.client.plugins.questhelper.steps.conditional.ConditionForStep;
 import net.runelite.client.plugins.questhelper.steps.conditional.Conditions;
 import net.runelite.client.plugins.questhelper.steps.conditional.OwnerStep;
@@ -45,9 +49,10 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 	@Inject
 	protected EventBus eventBus;
 
-	private boolean started = false;
+	protected boolean started = false;
 
-	private final LinkedHashMap<Conditions, QuestStep> steps;
+	protected final LinkedHashMap<Conditions, QuestStep> steps;
+	protected final ArrayList<ChatMessageCondition> chatConditions = new ArrayList<>();
 
 	private QuestStep currentStep;
 
@@ -59,10 +64,26 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 
 	public void addStep(Conditions conditions, QuestStep step) {
 		this.steps.put(conditions, step);
+		checkForChatConditions(conditions);
 	}
 
 	public void addStep(ConditionForStep condition, QuestStep step) {
 		this.steps.put(new Conditions(condition), step);
+		checkForChatConditions(condition);
+	}
+
+	public void checkForChatConditions(ConditionForStep condition) {
+		if (condition != null && condition.getConditions() == null) {
+			if (condition.getClass() == ChatMessageCondition.class && !chatConditions.contains(condition))
+			{
+				chatConditions.add((ChatMessageCondition) condition);
+			}
+		} else {
+			for (ConditionForStep subCondition : condition.getConditions())
+			{
+				checkForChatConditions(subCondition);
+			}
+		}
 	}
 
 	@Override
@@ -89,7 +110,19 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 		}
 	}
 
-	private void updateSteps()
+	@Subscribe
+	public void onChatMessage(ChatMessage chatMessage)
+	{
+		if (chatMessage.getType() == ChatMessageType.GAMEMESSAGE)
+		{
+			for (ChatMessageCondition step : chatConditions)
+			{
+				step.validateCondition(chatMessage.getMessage());
+			}
+		}
+	}
+
+	protected void updateSteps()
 	{
 		for (Conditions conditions : steps.keySet())
 		{
@@ -152,7 +185,12 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 
 	@Override
 	public QuestStep getActiveStep() {
-		return currentStep.getActiveStep();
+		if (currentStep != null)
+		{
+			return currentStep.getActiveStep();
+		} else {
+			return this;
+		}
 	}
 
 	@Override

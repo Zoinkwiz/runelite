@@ -162,11 +162,14 @@ public class QuestHelperPlugin extends Plugin
 	{
 		if (selectedQuest != null)
 		{
-			QuestStep currentStep = selectedQuest.getCurrentStep().getActiveStep();
-			if (currentStep != null && currentStep != lastStep)
+			if (selectedQuest.getCurrentStep() != null)
 			{
-				lastStep = currentStep;
-				panel.updateHighlight(currentStep);
+				QuestStep currentStep = selectedQuest.getCurrentStep().getActiveStep();
+				if (currentStep != null && currentStep != lastStep)
+				{
+					lastStep = currentStep;
+					panel.updateHighlight(currentStep);
+				}
 			}
 		}
 	}

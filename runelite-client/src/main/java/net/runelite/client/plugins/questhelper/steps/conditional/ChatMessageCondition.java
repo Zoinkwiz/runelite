@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Zoinkwiz <https://github.com/Zoinkwiz>
+ * Copyright (c) 2020, Zoinkwiz
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,20 +25,35 @@
 package net.runelite.client.plugins.questhelper.steps.conditional;
 
 import java.util.ArrayList;
-import lombok.Getter;
+import java.util.Arrays;
 import lombok.Setter;
 import net.runelite.api.Client;
 
-public abstract class ConditionForStep
+public class ChatMessageCondition extends ConditionForStep
 {
 	@Setter
-	@Getter
-	protected boolean hasPassed;
-	protected boolean onlyNeedToPassOnce;
-	protected LogicType logicType;
+	private boolean hasReceivedChatMessage = false;
 
-	@Getter
-	protected ArrayList<ConditionForStep> conditions;
+	private ArrayList<String> messages;
 
-	abstract public boolean checkCondition(Client client);
+	public ChatMessageCondition(String... message)
+	{
+		this.messages = new ArrayList<>(Arrays.asList(message));
+	}
+
+	@Override
+	public boolean checkCondition(Client client)
+	{
+		return hasReceivedChatMessage;
+	}
+
+	public void validateCondition(String chatMessage) {
+		if (!hasReceivedChatMessage)
+		{
+			if (messages.contains(chatMessage))
+			{
+				hasReceivedChatMessage = true;
+			}
+		}
+	}
 }

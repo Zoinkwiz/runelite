@@ -25,6 +25,7 @@
 package net.runelite.client.plugins.questhelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
@@ -45,12 +46,15 @@ public class ItemRequirement
 
 	@Getter
 	private final int quantity;
+
+	@Getter
 	private boolean equip;
+
 	@Setter
 	@Getter
 	private String tip;
 
-	private List<Integer> alternates = new ArrayList<>();
+	private final List<Integer> alternates = new ArrayList<>();
 
 	public ItemRequirement(String name, int id)
 	{
@@ -89,7 +93,13 @@ public class ItemRequirement
 		return name;
 	}
 
-	public boolean check(Client client)
+	public ArrayList<Integer> getAllIds() {
+		ArrayList<Integer> ids = new ArrayList<>(alternates);
+		ids.add(id);
+		return ids;
+	}
+
+	public boolean check(Client client, boolean checkEquippedOnly)
 	{
 		ItemContainer equipped = client.getItemContainer(InventoryID.EQUIPMENT);
 		int tempQuantity = quantity;
@@ -114,7 +124,7 @@ public class ItemRequirement
 			}
 		}
 
-		if(!equip) {
+		if(!checkEquippedOnly) {
 			ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
 			if(inventory != null)
 			{
@@ -136,5 +146,9 @@ public class ItemRequirement
 			}
 		}
 		return false;
+	}
+
+	public boolean check(Client client) {
+		return check(client, false);
 	}
 }

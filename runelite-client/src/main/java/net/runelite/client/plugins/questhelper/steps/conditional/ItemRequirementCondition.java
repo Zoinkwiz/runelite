@@ -36,14 +36,18 @@ public class ItemRequirementCondition extends ConditionForStep
 {
 	private final List<ItemRequirement> itemRequirements;
 
-	// TODO: This do nothin'
-	private final boolean checkHasItem;
-
 	public ItemRequirementCondition(ItemRequirement... itemRequirements)
 	{
 		this.itemRequirements = new ArrayList<>();
 		this.itemRequirements.addAll(Arrays.asList(itemRequirements));
-		this.checkHasItem = true;
+		this.logicType = LogicType.AND;
+	}
+
+	public ItemRequirementCondition(LogicType logicType, ItemRequirement... itemRequirements)
+	{
+		this.itemRequirements = new ArrayList<>();
+		this.itemRequirements.addAll(Arrays.asList(itemRequirements));
+		this.logicType = logicType;
 	}
 
 	@Override
@@ -52,11 +56,19 @@ public class ItemRequirementCondition extends ConditionForStep
 		int successes = 0;
 		for (ItemRequirement itemRequirement : itemRequirements)
 		{
-			if (itemRequirement.check(client) == checkHasItem)
+			if (itemRequirement.check(client))
 			{
 				successes++;
 			}
 		}
-		return successes == itemRequirements.size();
+		if ((successes == itemRequirements.size() && logicType == LogicType.AND)
+			|| (successes > 0 && logicType == LogicType.OR)
+			|| (successes < itemRequirements.size() && logicType == LogicType.NAND)
+			|| (successes == 0 && logicType == LogicType.NOR))
+		{
+			return true;
+		}
+
+		return false;
 	}
 }

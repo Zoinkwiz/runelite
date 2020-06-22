@@ -104,6 +104,7 @@ public class NpcTalkStep extends DetailedQuestStep
 			|| !client.getHintArrowNpc().equals(npc))) {
 			client.setHintArrow(npc);
 		} else if (worldPoint != null
+			&& client.getHintArrowPoint() == null
 			&& (client.getHintArrowNpc() == null
 			|| !client.getHintArrowNpc().equals(npc)))
 		{

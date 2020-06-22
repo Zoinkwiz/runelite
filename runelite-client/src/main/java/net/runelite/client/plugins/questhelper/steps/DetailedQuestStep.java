@@ -27,6 +27,7 @@ package net.runelite.client.plugins.questhelper.steps;
 import com.google.inject.Binder;
 import com.google.inject.Inject;
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.util.ArrayList;
@@ -67,6 +68,8 @@ public class DetailedQuestStep extends QuestStep
 	protected WorldPoint worldPoint;
 	protected List<ItemRequirement> itemRequirements = new ArrayList<>();
 	protected HashMap<Integer, List<Tile>> tileHighlights = new HashMap<>();
+
+	protected HashMap<Tile, List<Integer>> newTileHighlights = new HashMap<>();
 
 	protected static final int MAX_DISTANCE = 2350;
 
@@ -132,8 +135,18 @@ public class DetailedQuestStep extends QuestStep
 			{
 				color = Color.RED;
 			}
+			String equipText = "";
+			Color equipColor = Color.GREEN;
+			if (itemRequirement.isEquip()) {
+				equipText = "(equipped)";
+				if (!itemRequirement.check(client, true)) {
+					equipColor = Color.RED;
+				}
+			}
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left(text)
+				.right(equipText)
+				.rightColor(equipColor)
 				.leftColor(color)
 				.build());
 			if (itemRequirement.getTip() != null && color == Color.RED)
@@ -149,16 +162,14 @@ public class DetailedQuestStep extends QuestStep
 	@Subscribe
 	public void onItemSpawned(ItemSpawned itemSpawned)
 	{
-		final TileItem item = itemSpawned.getItem();
+		TileItem item = itemSpawned.getItem();
+		Tile tile = itemSpawned.getTile();
 		for (ItemRequirement itemRequirement : itemRequirements)
 		{
-			if (itemRequirement.getId() == item.getId())
+			if (itemRequirement.getAllIds().contains(item.getId()))
 			{
-				tileHighlights.computeIfAbsent(item.getId(), k -> new ArrayList<>());
-				if (!tileHighlights.get(item.getId()).contains(itemSpawned.getTile()))
-				{
-					tileHighlights.get(item.getId()).add(itemSpawned.getTile());
-				}
+				newTileHighlights.computeIfAbsent(tile, k -> new ArrayList<>());
+				newTileHighlights.get(tile).add(itemRequirement.getId());
 			}
 		}
 	}
@@ -168,33 +179,20 @@ public class DetailedQuestStep extends QuestStep
 	{
 		if (event.getGameState() == GameState.LOADING)
 		{
-			tileHighlights.clear();
+			newTileHighlights.clear();
 		}
 	}
 
 	@Subscribe
 	public void onItemDespawned(ItemDespawned itemDespawned)
 	{
-		List<TileItem> items = itemDespawned.getTile().getGroundItems();
-		boolean itemStillOnTile = false;
-		if (items != null)
-		{
-			for (TileItem item : items)
-			{
-				if (item.getId() == itemDespawned.getItem().getId())
-				{
-					itemStillOnTile = true;
-				}
-			}
+		Tile tile = itemDespawned.getTile();
+
+		if (!newTileHighlights.containsKey(tile)) {
+			return;
 		}
-		if (!itemStillOnTile)
-		{
-			List<Tile> currentTile = tileHighlights.get(itemDespawned.getItem().getId());
-			if (currentTile != null)
-			{
-				currentTile.remove(itemDespawned.getTile());
-			}
-		}
+
+		newTileHighlights.get(tile).remove((Object)itemDespawned.getItem().getId());
 	}
 
 	private void addItemTiles() {
@@ -212,13 +210,11 @@ public class DetailedQuestStep extends QuestStep
 						{
 							for (ItemRequirement itemRequirement : itemRequirements)
 							{
-								if (item.getId() == itemRequirement.getId())
+								if (itemRequirement.getAllIds().contains(item.getId()))
 								{
-									tileHighlights.computeIfAbsent(item.getId(), k -> new ArrayList<>());
-									if (!tileHighlights.get(item.getId()).contains(tile))
-									{
-										tileHighlights.get(item.getId()).add(tile);
-									}
+									newTileHighlights.computeIfAbsent(tile, k -> new ArrayList<>());
+									newTileHighlights.get(tile).add(item.getId());
+									break;
 								}
 							}
 						}
@@ -231,35 +227,48 @@ public class DetailedQuestStep extends QuestStep
 	@Override
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
+		if (client.getLocalPlayer() == null) {
+			return;
+		}
+
+		newTileHighlights.forEach((tile, ids) -> {
+			checkAllTilesForHighlighting(tile, ids, graphics);
+		});
+	}
+
+	private void checkAllTilesForHighlighting(Tile tile, List<Integer> ids, Graphics2D graphics) {
 		LocalPoint playerLocation = client.getLocalPlayer().getLocalLocation();
-		itemRequirements.forEach(itemRequirement -> {
-			if (!itemRequirement.check(client))
+		if (!ids.isEmpty())
+		{
+			LocalPoint location = tile.getLocalLocation();
+
+			if (location == null)
 			{
-				List<Tile> tiles = tileHighlights.get(itemRequirement.getId());
-				if(tiles != null)
+				return;
+			}
+
+			if (location.distanceTo(playerLocation) > MAX_DISTANCE)
+			{
+				return;
+			}
+
+			Polygon poly = Perspective.getCanvasTilePoly(client, location);
+			if (poly == null)
+			{
+				return;
+			}
+
+			for (int id : ids)
+			{
+				for (ItemRequirement itemRequirement : itemRequirements)
 				{
-					for (Tile tile : tiles)
+					if (itemRequirement.getAllIds().contains(id) && !itemRequirement.check(client))
 					{
-						LocalPoint location = tile.getLocalLocation();
-
-						if (location == null)
-						{
-							continue;
-						}
-
-						if (location.distanceTo(playerLocation) > MAX_DISTANCE) {
-							continue;
-						}
-
-						Polygon poly = Perspective.getCanvasTilePoly(client, location);
-						if (poly == null)
-						{
-							continue;
-						}
 						OverlayUtil.renderPolygon(graphics, poly, Color.CYAN);
+						return;
 					}
 				}
 			}
-		});
+		}
 	}
 }

@@ -23,6 +23,7 @@ import net.runelite.client.plugins.questhelper.steps.QuestStep;
 import net.runelite.client.plugins.questhelper.steps.conditional.ConditionForStep;
 import net.runelite.client.plugins.questhelper.steps.conditional.Conditions;
 import net.runelite.client.plugins.questhelper.steps.conditional.ItemRequirementCondition;
+import net.runelite.client.plugins.questhelper.steps.conditional.LogicType;
 import net.runelite.client.plugins.questhelper.steps.conditional.ObjectCondition;
 import net.runelite.client.plugins.questhelper.steps.conditional.VarbitCondition;
 import net.runelite.client.plugins.questhelper.steps.conditional.ZoneCondition;
@@ -71,9 +72,9 @@ public class EaglesPeak extends BasicQuestHelper
 
 		steps.put(10, enterEaglesPeak);
 
-		Conditions hasGoldFeatherOrUsed = new Conditions(false, hasGoldFeather, hasInsertedGoldFeather);
-		Conditions hasSilverFeatherOrUsed = new Conditions(false, hasSilverFeather, hasInsertedSilverFeather);
-		Conditions hasBronzeFeatherOrUsed = new Conditions(false, hasBronzeFeather, hasInsertedBronzeFeather);
+		Conditions hasGoldFeatherOrUsed = new Conditions(LogicType.OR, hasGoldFeather, hasInsertedGoldFeather);
+		Conditions hasSilverFeatherOrUsed = new Conditions(LogicType.OR, hasSilverFeather, hasInsertedSilverFeather);
+		Conditions hasBronzeFeatherOrUsed = new Conditions(LogicType.OR, hasBronzeFeather, hasInsertedBronzeFeather);
 
 		ConditionalStep createDisguises = new ConditionalStep(this, enterEaglesPeak);
 		createDisguises.addStep(new Conditions(inMainCavern, hasInsertedGoldFeather, hasInsertedBronzeFeather, hasSilverFeatherOrUsed), useSilverFeathersOnStoneDoor);

@@ -31,35 +31,51 @@ import net.runelite.api.Client;
 
 public class Conditions extends ConditionForStep
 {
-	protected List<ConditionForStep> conditions;
-	protected boolean isAnd;
-
 	public Conditions(ConditionForStep... conditions) {
 		this.conditions = new ArrayList<>();
 		Collections.addAll(this.conditions, conditions);
-		isAnd = true;
+		logicType = LogicType.AND;
 	}
 
-	public Conditions(boolean isAnd, ConditionForStep... conditions) {
+	public Conditions(LogicType logicType, ConditionForStep... conditions) {
 		this.conditions = new ArrayList<>();
 		Collections.addAll(this.conditions, conditions);
-		this.isAnd = isAnd;
+		this.logicType = logicType;
+	}
+
+	public Conditions(boolean onlyNeedToPassOnce, LogicType logicType, ConditionForStep... conditions) {
+		this.conditions = new ArrayList<>();
+		Collections.addAll(this.conditions, conditions);
+		this.onlyNeedToPassOnce = onlyNeedToPassOnce;
+		this.logicType = logicType;
 	}
 
 	@Override
-	public boolean checkCondition(Client client) {
+	public boolean checkCondition(Client client)
+	{
+		if (onlyNeedToPassOnce && hasPassed)
+		{
+			return true;
+		}
+
+		int conditionsPassed = 0;
+
 		for (ConditionForStep condition : conditions)
 		{
-			if(!condition.checkCondition(client)) {
-				if (isAnd) {
-					return false;
-				}
-			} else  {
-				if (!isAnd) {
-					return true;
-				}
+			if (condition.checkCondition(client))
+			{
+				conditionsPassed++;
 			}
 		}
-		return isAnd;
+
+		if ((conditionsPassed > 0 && logicType == LogicType.OR)
+		|| (conditionsPassed == 0 && logicType == LogicType.NOR)
+		|| (conditionsPassed == conditions.size() && logicType == LogicType.AND)
+		|| (conditionsPassed < conditions.size() && logicType == LogicType.NAND)) {
+			hasPassed = true;
+			return true;
+		}
+
+		return false;
 	}
 }

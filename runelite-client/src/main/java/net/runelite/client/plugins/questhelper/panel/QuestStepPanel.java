@@ -50,7 +50,6 @@ public class QuestStepPanel extends JPanel
 
     public QuestStepPanel(PanelDetails panelDetails, QuestStep currentStep)
 	{
-		System.out.println(currentStep.getText());
 		setLayout(new BorderLayout(0, 1));
 		setBorder(new EmptyBorder(5, 0, 0, 0));
 

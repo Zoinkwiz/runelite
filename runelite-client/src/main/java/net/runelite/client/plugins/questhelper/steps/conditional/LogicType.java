@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Zoinkwiz <https://github.com/Zoinkwiz>
+ * Copyright (c) 2020, Zoinkwiz
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,21 +24,9 @@
  */
 package net.runelite.client.plugins.questhelper.steps.conditional;
 
-import java.util.ArrayList;
-import lombok.Getter;
-import lombok.Setter;
-import net.runelite.api.Client;
-
-public abstract class ConditionForStep
-{
-	@Setter
-	@Getter
-	protected boolean hasPassed;
-	protected boolean onlyNeedToPassOnce;
-	protected LogicType logicType;
-
-	@Getter
-	protected ArrayList<ConditionForStep> conditions;
-
-	abstract public boolean checkCondition(Client client);
+public enum LogicType {
+	AND,
+	OR,
+	NAND,
+	NOR
 }

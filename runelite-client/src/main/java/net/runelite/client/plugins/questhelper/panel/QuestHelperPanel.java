@@ -302,12 +302,18 @@ class QuestHelperPanel extends PluginPanel
 		JLabel itemLabel = new JLabel();
 		itemLabel.setForeground(Color.GRAY);
 		StringBuilder text = new StringBuilder();
-		for (ItemRequirement itemRequirement : itemRequirements)
+		if(itemRequirements != null)
 		{
-			if(!text.toString().equals("")) {
-				text.append("<br>");
+			for (ItemRequirement itemRequirement : itemRequirements)
+			{
+				if (!text.toString().equals(""))
+				{
+					text.append("<br>");
+				}
+				text.append(itemRequirement.getQuantity()).append(" x ").append(itemRequirement.getName());
 			}
-			text.append(itemRequirement.getQuantity()).append(" x ").append(itemRequirement.getName());
+		} else {
+			text.append("None");
 		}
 
 		questItemRequirementsListPanel.add(itemLabel);

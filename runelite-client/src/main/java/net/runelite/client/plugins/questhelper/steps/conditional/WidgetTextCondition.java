@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Zoinkwiz <https://github.com/Zoinkwiz>
+ * Copyright (c) 2020, Zoinkwiz
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,20 +25,54 @@
 package net.runelite.client.plugins.questhelper.steps.conditional;
 
 import java.util.ArrayList;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.Arrays;
 import net.runelite.api.Client;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
 
-public abstract class ConditionForStep
+public class WidgetTextCondition extends ConditionForStep
 {
-	@Setter
-	@Getter
-	protected boolean hasPassed;
-	protected boolean onlyNeedToPassOnce;
-	protected LogicType logicType;
+	private final int groupId;
+	private final int childId;
+	private final ArrayList<String> text;
+	private int childChildId = -1;
 
-	@Getter
-	protected ArrayList<ConditionForStep> conditions;
+	public WidgetTextCondition(WidgetInfo widgetInfo, String... text) {
 
-	abstract public boolean checkCondition(Client client);
+		this.groupId = widgetInfo.getGroupId();
+		this.childId = widgetInfo.getChildId();
+		this.text = new ArrayList<String>(Arrays.asList(text));
+	}
+
+	public WidgetTextCondition(int groupId, int childId, String... text) {
+		this.groupId = groupId;
+		this.childId = childId;
+		this.text = new ArrayList<String>(Arrays.asList(text));
+	}
+
+	public WidgetTextCondition(int groupId, int childId, int childChildId, String... text) {
+		this.groupId = groupId;
+		this.childId = childId;
+		this.childChildId = childChildId;
+		this.text = new ArrayList<String>(Arrays.asList(text));
+	}
+
+	@Override
+	public boolean checkCondition(Client client)
+	{
+		Widget widget = client.getWidget(groupId, childId);
+		if (widget != null) {
+			if (childChildId != -1) {
+				widget = widget.getChild(childChildId);
+			}
+			for (String textOption : text)
+			{
+				if (widget.getText().contains(textOption))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }
