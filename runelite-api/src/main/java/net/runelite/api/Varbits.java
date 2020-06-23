@@ -635,6 +635,8 @@ public enum Varbits
 
 	DIALOG_CHOICE(5983),
 
+	CUTSCENE(542),
+
 	/**
 	* Ernest the chicken quest puzzle levers
 	 */

@@ -231,41 +231,44 @@ class QuestHelperPanel extends PluginPanel
     public void addQuest(BasicQuestHelper quest) {
         ArrayList<PanelDetails> steps = quest.getPanels();
 
-        QuestStep currentStep = quest.getCurrentStep().getActiveStep();
+		if (quest.getCurrentStep() != null)
+		{
+			QuestStep currentStep = quest.getCurrentStep().getActiveStep();
 
-        questNameLabel.setText(quest.getQuest().getName());
-		actionsContainer.setVisible(true);
+			questNameLabel.setText(quest.getQuest().getName());
+			actionsContainer.setVisible(true);
 
-		setupQuestRequirements(quest);
-		overviewPanel.setVisible(true);
+			setupQuestRequirements(quest);
+			overviewPanel.setVisible(true);
 
-		steps.forEach((step) -> {
-			QuestStepPanel newStep = new QuestStepPanel(step, currentStep);
-			questStepPanelList.add(newStep);
-			questStepsContainer.add(newStep);
-			newStep.addMouseListener(new MouseAdapter()
-			{
-				@Override
-				public void mouseClicked(MouseEvent e)
+			steps.forEach((step) -> {
+				QuestStepPanel newStep = new QuestStepPanel(step, currentStep);
+				questStepPanelList.add(newStep);
+				questStepsContainer.add(newStep);
+				newStep.addMouseListener(new MouseAdapter()
 				{
-					if (e.getButton() == MouseEvent.BUTTON1)
+					@Override
+					public void mouseClicked(MouseEvent e)
 					{
-						if (newStep.isCollapsed())
+						if (e.getButton() == MouseEvent.BUTTON1)
 						{
-							newStep.expand();
+							if (newStep.isCollapsed())
+							{
+								newStep.expand();
+							}
+							else
+							{
+								newStep.collapse();
+							}
+							updateCollapseText();
 						}
-						else
-						{
-							newStep.collapse();
-						}
-						updateCollapseText();
 					}
-				}
+				});
 			});
-		});
 
-        repaint();
-        revalidate();
+			repaint();
+			revalidate();
+		}
     }
 
     public void updateHighlight(QuestStep newStep)

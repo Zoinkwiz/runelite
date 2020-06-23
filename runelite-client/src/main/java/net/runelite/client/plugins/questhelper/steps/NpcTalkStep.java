@@ -96,12 +96,13 @@ public class NpcTalkStep extends DetailedQuestStep
 		}
 	}
 
-	@Subscribe
-	public void onGameTick(GameTick event)
+	@Override
+	public void setArrow()
 	{
 		if (npc != null
 			&& (client.getHintArrowNpc() == null
-			|| !client.getHintArrowNpc().equals(npc))) {
+			|| !client.getHintArrowNpc().equals(npc)))
+		{
 			client.setHintArrow(npc);
 		} else if (worldPoint != null
 			&& client.getHintArrowPoint() == null
@@ -109,17 +110,30 @@ public class NpcTalkStep extends DetailedQuestStep
 			|| !client.getHintArrowNpc().equals(npc)))
 		{
 			Collection<WorldPoint> localWorldPoints = WorldPoint.toLocalInstance(client, worldPoint);
-			if (localWorldPoints.isEmpty()) {
+			if (localWorldPoints.isEmpty())
+			{
 				return;
 			}
 			client.setHintArrow(localWorldPoints.iterator().next());
 		}
 	}
 
+	@Subscribe
+	public void onGameTick(GameTick event)
+	{
+		setArrow();
+	}
+
 	@Override
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
 		super.makeWorldOverlayHint(graphics, plugin);
+
+		if (inCutscene)
+		{
+			return;
+		}
+
 		Collection<WorldPoint> localWorldPoints = WorldPoint.toLocalInstance(client, worldPoint);
 		if (localWorldPoints.isEmpty())
 		{

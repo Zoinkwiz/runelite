@@ -111,6 +111,9 @@ public class QuestHelperPlugin extends Plugin
 	private QuestHelperOverlay questHelperOverlay;
 
 	@Inject
+	private QuestHelperWidgetOverlay questHelperWidgetOverlay;
+
+	@Inject
 	private QuestHelperWorldOverlay questHelperWorldOverlay;
 
 	@Getter
@@ -134,6 +137,7 @@ public class QuestHelperPlugin extends Plugin
 		quests = scanAndInstantiate(getClass().getClassLoader(), QUEST_PACKAGE);
 		overlayManager.add(questHelperOverlay);
 		overlayManager.add(questHelperWorldOverlay);
+		overlayManager.add(questHelperWidgetOverlay);
 
 		final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "quest_icon.png");
 		panel = new QuestHelperPanel(this, client);
@@ -152,6 +156,7 @@ public class QuestHelperPlugin extends Plugin
 	{
 		overlayManager.remove(questHelperOverlay);
 		overlayManager.remove(questHelperWorldOverlay);
+		overlayManager.remove(questHelperWidgetOverlay);
 		clientToolbar.removeNavigation(navButton);
 		quests = null;
 		shutDownQuest();

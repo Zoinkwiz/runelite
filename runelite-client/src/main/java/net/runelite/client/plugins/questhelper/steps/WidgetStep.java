@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Trevor <https://github.com/Trevor159>
+ * Copyright (c) 2020, Zoinkwiz
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,50 +26,50 @@ package net.runelite.client.plugins.questhelper.steps;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import javax.inject.Inject;
-import net.runelite.api.Client;
-import net.runelite.api.ItemID;
-import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.coords.WorldPoint;
-import net.runelite.client.plugins.questhelper.ItemRequirement;
-import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
+import java.util.ArrayList;
+import java.util.Arrays;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
-import net.runelite.client.ui.overlay.OverlayUtil;
+import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
 
-public class DigStep extends DetailedQuestStep
+public class WidgetStep extends QuestStep
 {
-	@Inject
-	Client client;
+	private ArrayList<WidgetDetails> widgetDetails = new ArrayList<>();
 
-	public DigStep(QuestHelper questHelper, WorldPoint worldPoint, String text, ItemRequirement... itemRequirements)
+	public WidgetStep(QuestHelper questHelper, String text, int groupID, int childID)
 	{
-		super(questHelper, worldPoint, text, itemRequirements);
-		this.itemRequirements.add(new ItemRequirement("Spade", ItemID.SPADE));
+		super(questHelper, text);
+		widgetDetails.add(new WidgetDetails(groupID, childID, -1));
+	}
+
+	public WidgetStep(QuestHelper questHelper, String text, int groupID, int childID, int childChildID)
+	{
+		super(questHelper, text);
+		widgetDetails.add(new WidgetDetails(groupID, childID, childChildID));
+	}
+
+	public WidgetStep(QuestHelper questHelper, String text, WidgetDetails... widgetDetails)
+	{
+		super(questHelper, text);
+		this.widgetDetails = new ArrayList(Arrays.asList(widgetDetails));
 	}
 
 	@Override
-	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
-	{
-		super.makeWorldOverlayHint(graphics, plugin);
-
-		if (inCutscene)
+	public void makeWidgetOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin) {
+		for (WidgetDetails widgetDetail : widgetDetails)
 		{
-			return;
+			Widget widget = client.getWidget(widgetDetail.groupID, widgetDetail.childID);
+			if (widget != null && widgetDetail.childChildID != -1)  {
+				widget = widget.getChild(widgetDetail.childChildID);
+			}
+
+			if (widget != null)
+			{
+				graphics.setColor(new Color(0, 255, 255, 65));
+				graphics.fill(widget.getBounds());
+				graphics.setColor(Color.CYAN);
+				graphics.draw(widget.getBounds());
+			}
 		}
-
-		LocalPoint localLocation = LocalPoint.fromWorld(client, worldPoint);
-
-		if (localLocation == null)
-		{
-			return;
-		}
-
-		OverlayUtil.renderTileOverlay(client, graphics, localLocation, getSpadeImage(), Color.ORANGE);
-	}
-
-	private BufferedImage getSpadeImage()
-	{
-		return itemManager.getImage(ItemID.SPADE);
 	}
 }

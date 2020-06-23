@@ -63,8 +63,10 @@ public abstract class QuestStep implements Module
 	protected String text;
 
 	private int currentChoice = 0;
+	private int currentCutsceneStatus = 0;
+	protected boolean inCutscene;
 
-	protected int iconItemID;
+	protected int iconItemID = -1;
 	protected BufferedImage itemIcon;
 
 	@Getter
@@ -100,6 +102,24 @@ public abstract class QuestStep implements Module
 			clientThread.invokeLater(this::highlightChoice);
 		}
 		currentChoice = newChoice;
+
+		int newCutsceneStatus = client.getVar(Varbits.CUTSCENE);
+		if (currentCutsceneStatus == 0 && newCutsceneStatus == 1) {
+			enteredCutscene();
+		} else if (currentCutsceneStatus == 1 && newCutsceneStatus == 0){
+			leftCutscene();
+		}
+		currentCutsceneStatus = newCutsceneStatus;
+	}
+
+	public void enteredCutscene()
+	{
+		inCutscene = true;
+	}
+
+	public void leftCutscene()
+	{
+		inCutscene = false;
 	}
 
 	public void highlightChoice() {
@@ -128,6 +148,9 @@ public abstract class QuestStep implements Module
 
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
+	}
+
+	public void makeWidgetOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin){
 	}
 
 	public QuestStep getActiveStep() {

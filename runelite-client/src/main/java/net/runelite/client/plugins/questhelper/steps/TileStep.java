@@ -43,22 +43,19 @@ public class TileStep extends DetailedQuestStep
 	public void shutDown()
 	{
 		worldMapPointManager.removeIf(QuestHelperWorldMapPoint.class::isInstance);
-		client.clearHintArrow();
-	}
-
-	@Subscribe
-	public void onGameTick(GameTick event)
-	{
-		if (worldPoint != null)
-		{
-			client.setHintArrow(worldPoint);
-		}
+		clearArrow();
 	}
 
 	@Override
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
 		super.makeWorldOverlayHint(graphics, plugin);
+
+		if (inCutscene)
+		{
+			return;
+		}
+
 		LocalPoint lp = LocalPoint.fromWorld(client, worldPoint);
 		if (lp == null)
 		{

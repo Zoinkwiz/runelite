@@ -56,29 +56,36 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 
 	private QuestStep currentStep;
 
-	public ConditionalStep(QuestHelper questHelper, QuestStep step) {
+	public ConditionalStep(QuestHelper questHelper, QuestStep step)
+	{
 		super(questHelper, null);
 		this.steps = new LinkedHashMap<>();
 		this.steps.put(null, step);
 	}
 
-	public void addStep(Conditions conditions, QuestStep step) {
+	public void addStep(Conditions conditions, QuestStep step)
+	{
 		this.steps.put(conditions, step);
 		checkForChatConditions(conditions);
 	}
 
-	public void addStep(ConditionForStep condition, QuestStep step) {
+	public void addStep(ConditionForStep condition, QuestStep step)
+	{
 		this.steps.put(new Conditions(condition), step);
 		checkForChatConditions(condition);
 	}
 
-	public void checkForChatConditions(ConditionForStep condition) {
-		if (condition != null && condition.getConditions() == null) {
+	public void checkForChatConditions(ConditionForStep condition)
+	{
+		if (condition != null && condition.getConditions() == null)
+		{
 			if (condition.getClass() == ChatMessageCondition.class && !chatConditions.contains(condition))
 			{
 				chatConditions.add((ChatMessageCondition) condition);
 			}
-		} else {
+		}
+		else
+		{
 			for (ConditionForStep subCondition : condition.getConditions())
 			{
 				checkForChatConditions(subCondition);
@@ -168,7 +175,7 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 	@Override
 	public void makeOverlayHint(PanelComponent panelComponent, QuestHelperPlugin plugin)
 	{
-		if(currentStep != null)
+		if (currentStep != null)
 		{
 			currentStep.makeOverlayHint(panelComponent, plugin);
 		}
@@ -177,18 +184,21 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 	@Override
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
-		if(currentStep != null)
+		if (currentStep != null)
 		{
 			currentStep.makeWorldOverlayHint(graphics, plugin);
 		}
 	}
 
 	@Override
-	public QuestStep getActiveStep() {
+	public QuestStep getActiveStep()
+	{
 		if (currentStep != null)
 		{
 			return currentStep.getActiveStep();
-		} else {
+		}
+		else
+		{
 			return this;
 		}
 	}

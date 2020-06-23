@@ -33,6 +33,7 @@ import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import lombok.Getter;
@@ -43,7 +44,6 @@ import net.runelite.api.TileItem;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemDespawned;
 import net.runelite.api.events.ItemSpawned;
 import net.runelite.client.eventbus.Subscribe;
@@ -102,7 +102,7 @@ public class DetailedQuestStep extends QuestStep
 		if (worldPoint != null)
 		{
 			worldMapPointManager.add(new QuestHelperWorldMapPoint(worldPoint, getQuestImage()));
-			client.setHintArrow(worldPoint);
+			setArrow();
 		}
 		addItemTiles();
 	}
@@ -112,6 +112,35 @@ public class DetailedQuestStep extends QuestStep
 	{
 		worldMapPointManager.removeIf(QuestHelperWorldMapPoint.class::isInstance);
 		tileHighlights.clear();
+		clearArrow();
+	}
+
+	@Override
+	public void enteredCutscene()
+	{
+		super.enteredCutscene();
+		clearArrow();
+	}
+
+	@Override
+	public void leftCutscene()
+	{
+		super.leftCutscene();
+		setArrow();
+	}
+
+	public void setArrow()
+	{
+		Collection<WorldPoint> localWorldPoints = WorldPoint.toLocalInstance(client, worldPoint);
+		if (localWorldPoints.isEmpty())
+		{
+			return;
+		}
+		client.setHintArrow(localWorldPoints.iterator().next());
+	}
+
+	public void clearArrow()
+	{
 		client.clearHintArrow();
 	}
 
@@ -120,6 +149,11 @@ public class DetailedQuestStep extends QuestStep
 		super.makeOverlayHint(panelComponent, plugin);
 
 		if (itemRequirements.isEmpty())
+		{
+			return;
+		}
+
+		if (inCutscene)
 		{
 			return;
 		}
@@ -135,10 +169,11 @@ public class DetailedQuestStep extends QuestStep
 			text = text + itemRequirement.getName();
 
 			Color color;
-			if(!itemRequirement.isActualItem())
+			if (!itemRequirement.isActualItem())
 			{
 				color = Color.GRAY;
-			}else if (itemRequirement.check(client))
+			}
+			else if (itemRequirement.check(client))
 			{
 				color = Color.GREEN;
 			}
@@ -148,9 +183,11 @@ public class DetailedQuestStep extends QuestStep
 			}
 			String equipText = "";
 			Color equipColor = Color.GREEN;
-			if (itemRequirement.isEquip()) {
+			if (itemRequirement.isEquip())
+			{
 				equipText = "(equipped)";
-				if (!itemRequirement.check(client, true)) {
+				if (!itemRequirement.check(client, true))
+				{
 					equipColor = Color.RED;
 				}
 			}
@@ -199,20 +236,22 @@ public class DetailedQuestStep extends QuestStep
 	{
 		Tile tile = itemDespawned.getTile();
 
-		if (!newTileHighlights.containsKey(tile)) {
+		if (!newTileHighlights.containsKey(tile))
+		{
 			return;
 		}
 
-		newTileHighlights.get(tile).remove((Object)itemDespawned.getItem().getId());
+		newTileHighlights.get(tile).remove((Object) itemDespawned.getItem().getId());
 	}
 
-	private void addItemTiles() {
+	private void addItemTiles()
+	{
 		Tile[][] squareOfTiles = client.getScene().getTiles()[client.getPlane()];
 		for (Tile[] lineOfTiles : squareOfTiles)
 		{
 			for (Tile tile : lineOfTiles)
 			{
-				if(tile != null)
+				if (tile != null)
 				{
 					List<TileItem> items = tile.getGroundItems();
 					if (items != null)
@@ -238,7 +277,13 @@ public class DetailedQuestStep extends QuestStep
 	@Override
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)
 	{
-		if (client.getLocalPlayer() == null) {
+		if (client.getLocalPlayer() == null)
+		{
+			return;
+		}
+
+		if (inCutscene)
+		{
 			return;
 		}
 
@@ -247,7 +292,8 @@ public class DetailedQuestStep extends QuestStep
 		});
 	}
 
-	private void addIconImage() {
+	private void addIconImage()
+	{
 		BufferedImage itemImg = itemManager.getImage(iconItemID);
 		BufferedImage mapArrow = ImageUtil.getResourceStreamFromClass(getClass(), "/util/clue_arrow.png");
 		itemIcon = new BufferedImage(mapArrow.getWidth(), mapArrow.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -258,14 +304,27 @@ public class DetailedQuestStep extends QuestStep
 		tmpGraphics.drawImage(itemImg, buffer, buffer, null);
 	}
 
-	protected void addItemImageToLocation(Graphics2D graphics, LocalPoint lp) {
-		if (itemIcon == null) {
+	protected void addItemImageToLocation(Graphics2D graphics, LocalPoint lp)
+	{
+		if (itemIcon == null)
+		{
 			addIconImage();
+		}
+
+		if (inCutscene)
+		{
+			return;
 		}
 		OverlayUtil.renderTileOverlay(client, graphics, lp, itemIcon, Color.CYAN);
 	}
 
-	private void checkAllTilesForHighlighting(Tile tile, List<Integer> ids, Graphics2D graphics) {
+	private void checkAllTilesForHighlighting(Tile tile, List<Integer> ids, Graphics2D graphics)
+	{
+		if (inCutscene)
+		{
+			return;
+		}
+
 		LocalPoint playerLocation = client.getLocalPlayer().getLocalLocation();
 		if (!ids.isEmpty())
 		{

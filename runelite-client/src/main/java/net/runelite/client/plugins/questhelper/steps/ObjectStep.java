@@ -1,18 +1,13 @@
 package net.runelite.client.plugins.questhelper.steps;
 
 import com.google.common.primitives.Ints;
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.runelite.api.GameObject;
 import net.runelite.api.GameState;
 import net.runelite.api.ObjectComposition;
-import static net.runelite.api.Perspective.SCENE_SIZE;
 import net.runelite.api.Point;
 import net.runelite.api.Tile;
 import net.runelite.api.TileObject;
@@ -35,7 +30,6 @@ import static net.runelite.client.plugins.questhelper.QuestHelperWorldOverlay.CL
 import static net.runelite.client.plugins.questhelper.QuestHelperWorldOverlay.CLICKBOX_HOVER_BORDER_COLOR;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
 import net.runelite.client.ui.overlay.OverlayUtil;
-import net.runelite.client.util.ImageUtil;
 
 public class ObjectStep extends DetailedQuestStep
 {
@@ -93,7 +87,8 @@ public class ObjectStep extends DetailedQuestStep
 	}
 
 	@Override
-	public void shutDown() {
+	public void shutDown()
+	{
 		super.shutDown();
 		this.objects.clear();
 	}
@@ -122,7 +117,7 @@ public class ObjectStep extends DetailedQuestStep
 		if (event.getGameObject().equals(object))
 		{
 			object = null;
-			client.clearHintArrow();
+			clearArrow();
 		}
 	}
 
@@ -138,7 +133,7 @@ public class ObjectStep extends DetailedQuestStep
 		if (event.getGroundObject().equals(object))
 		{
 			object = null;
-			client.clearHintArrow();
+			clearArrow();
 		}
 	}
 
@@ -154,7 +149,7 @@ public class ObjectStep extends DetailedQuestStep
 		if (event.getDecorativeObject().equals(object))
 		{
 			object = null;
-			client.clearHintArrow();
+			clearArrow();
 		}
 	}
 
@@ -170,7 +165,7 @@ public class ObjectStep extends DetailedQuestStep
 		if (event.getWallObject().equals(object))
 		{
 			object = null;
-			client.clearHintArrow();
+			clearArrow();
 		}
 	}
 
@@ -179,6 +174,11 @@ public class ObjectStep extends DetailedQuestStep
 	{
 		super.makeWorldOverlayHint(graphics, plugin);
 		if (objects == null)
+		{
+			return;
+		}
+
+		if (inCutscene)
 		{
 			return;
 		}
@@ -193,13 +193,23 @@ public class ObjectStep extends DetailedQuestStep
 			}
 		}
 
-		if (iconItemID != -1 && object != null) {
+		if (iconItemID != -1 && object != null)
+		{
 			LocalPoint lp = LocalPoint.fromWorld(client, object.getWorldLocation());
 			if (lp != null)
 			{
-				System.out.println("IN THE THING");
 				addItemImageToLocation(graphics, lp);
 			}
+		}
+	}
+
+	@Override
+	public void setArrow()
+	{
+		super.setArrow();
+		if (object != null && !inCutscene)
+		{
+			client.setHintArrow(object.getWorldLocation());
 		}
 	}
 
@@ -222,7 +232,7 @@ public class ObjectStep extends DetailedQuestStep
 			{
 				this.object = object;
 				this.objects.add(object);
-				client.setHintArrow(object.getWorldLocation());
+				setArrow();
 				return;
 			}
 			if (highlightAll)
@@ -240,7 +250,7 @@ public class ObjectStep extends DetailedQuestStep
 			if (localWorldPoints.contains(object.getWorldLocation()))
 			{
 				this.object = object;
-				client.setHintArrow(object.getWorldLocation());    //TODO: better object arrows, probably hydrox's thing
+				setArrow();    //TODO: better object arrows, probably hydrox's thing
 			}
 			if (highlightAll)
 			{

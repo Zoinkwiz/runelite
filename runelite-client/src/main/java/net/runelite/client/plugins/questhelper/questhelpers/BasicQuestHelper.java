@@ -27,8 +27,6 @@ package net.runelite.client.plugins.questhelper.questhelpers;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Map;
-import lombok.Getter;
-import lombok.Setter;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.questhelper.ItemRequirement;
 import net.runelite.client.plugins.questhelper.panel.PanelDetails;
@@ -74,7 +72,9 @@ public abstract class BasicQuestHelper extends QuestHelper
 		return false;
 	}
 
-	public abstract ArrayList<ItemRequirement> getItemRequirements();
+	public ArrayList<ItemRequirement> getItemRequirements() {
+		return null;
+	}
 
 	public ArrayList<ItemRequirement> getItemRecommended() {
 		return null;
