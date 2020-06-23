@@ -30,6 +30,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,6 +57,7 @@ import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
+import net.runelite.client.util.ImageUtil;
 
 public class DetailedQuestStep extends QuestStep
 {
@@ -68,6 +70,9 @@ public class DetailedQuestStep extends QuestStep
 	protected WorldPoint worldPoint;
 	protected List<ItemRequirement> itemRequirements = new ArrayList<>();
 	protected HashMap<Integer, List<Tile>> tileHighlights = new HashMap<>();
+
+	protected int iconItemID;
+	protected BufferedImage itemIcon;
 
 	protected HashMap<Tile, List<Integer>> newTileHighlights = new HashMap<>();
 
@@ -125,9 +130,18 @@ public class DetailedQuestStep extends QuestStep
 		panelComponent.getChildren().add(LineComponent.builder().left("Required Items:").build());
 		for (ItemRequirement itemRequirement : itemRequirements)
 		{
-			String text = itemRequirement.getQuantity() + " x " + itemRequirement.getName();
+			String text = "";
+			if (itemRequirement.showQuantity())
+			{
+				text = itemRequirement.getQuantity() + " x ";
+			}
+			text = text + itemRequirement.getName();
+
 			Color color;
-			if (itemRequirement.check(client))
+			if(!itemRequirement.isActualItem())
+			{
+				color = Color.GRAY;
+			}else if (itemRequirement.check(client))
 			{
 				color = Color.GREEN;
 			}
@@ -210,7 +224,7 @@ public class DetailedQuestStep extends QuestStep
 						{
 							for (ItemRequirement itemRequirement : itemRequirements)
 							{
-								if (itemRequirement.getAllIds().contains(item.getId()))
+								if (itemRequirement.isActualItem() && itemRequirement.getAllIds().contains(item.getId()))
 								{
 									newTileHighlights.computeIfAbsent(tile, k -> new ArrayList<>());
 									newTileHighlights.get(tile).add(item.getId());
@@ -234,6 +248,28 @@ public class DetailedQuestStep extends QuestStep
 		newTileHighlights.forEach((tile, ids) -> {
 			checkAllTilesForHighlighting(tile, ids, graphics);
 		});
+	}
+
+	public void addIcon(int iconItemID) {
+		this.iconItemID = iconItemID;
+	}
+
+	private void addIconImage() {
+		BufferedImage itemImg = itemManager.getImage(iconItemID);
+		BufferedImage mapArrow = ImageUtil.getResourceStreamFromClass(getClass(), "/util/clue_arrow.png");
+		itemIcon = new BufferedImage(mapArrow.getWidth(), mapArrow.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		Graphics tmpGraphics = itemIcon.getGraphics();
+		tmpGraphics.drawImage(mapArrow, 0, 0, null);
+		int buffer = mapArrow.getWidth() / 2 - itemImg.getWidth() / 2;
+		buffer = Math.max(buffer, 0);
+		tmpGraphics.drawImage(itemImg, buffer, buffer, null);
+	}
+
+	protected void addItemImageToLocation(Graphics2D graphics, LocalPoint lp) {
+		if (itemIcon == null) {
+			addIconImage();
+		}
+		OverlayUtil.renderTileOverlay(client, graphics, lp, itemIcon, Color.CYAN);
 	}
 
 	private void checkAllTilesForHighlighting(Tile tile, List<Integer> ids, Graphics2D graphics) {
@@ -262,7 +298,7 @@ public class DetailedQuestStep extends QuestStep
 			{
 				for (ItemRequirement itemRequirement : itemRequirements)
 				{
-					if (itemRequirement.getAllIds().contains(id) && !itemRequirement.check(client))
+					if (itemRequirement.isActualItem() && itemRequirement.getAllIds().contains(id) && !itemRequirement.check(client))
 					{
 						OverlayUtil.renderPolygon(graphics, poly, Color.CYAN);
 						return;

@@ -106,7 +106,11 @@ public class QuestStepPanel extends JPanel
 				if(!itemText.toString().equals("")) {
 					itemText.append("<br>");
 				}
-				itemText.append(itemRequirement.getQuantity()).append(" x ").append(itemRequirement.getName());
+				if (itemRequirement.showQuantity())
+				{
+					itemText.append(itemRequirement.getQuantity()).append(" x ");
+				}
+				itemText.append(itemRequirement.getName());
 			}
 
 			itemLabel.setText("<html><body style = 'text-align:left'>" + itemText + "</body></html>");

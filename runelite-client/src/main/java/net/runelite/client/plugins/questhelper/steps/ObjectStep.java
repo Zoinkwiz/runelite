@@ -1,7 +1,11 @@
 package net.runelite.client.plugins.questhelper.steps;
 
 import com.google.common.primitives.Ints;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,14 +35,13 @@ import static net.runelite.client.plugins.questhelper.QuestHelperWorldOverlay.CL
 import static net.runelite.client.plugins.questhelper.QuestHelperWorldOverlay.CLICKBOX_HOVER_BORDER_COLOR;
 import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
 import net.runelite.client.ui.overlay.OverlayUtil;
+import net.runelite.client.util.ImageUtil;
 
 public class ObjectStep extends DetailedQuestStep
 {
 	private final int objectID;
 	private TileObject object;
-	private boolean highlightAll = false;
-
-	private int iconItemID = -1;
+	private boolean highlightAll;
 
 	private final List<TileObject> objects = new ArrayList<>();
 
@@ -94,10 +97,6 @@ public class ObjectStep extends DetailedQuestStep
 	public void shutDown() {
 		super.shutDown();
 		this.objects.clear();
-	}
-
-	public void addIcon(int iconItemID) {
-		this.iconItemID = iconItemID;
 	}
 
 	@Subscribe
@@ -185,22 +184,22 @@ public class ObjectStep extends DetailedQuestStep
 			return;
 		}
 
-		LocalPoint playerLocation = client.getLocalPlayer().getLocalLocation();
-
 		Point mousePosition = client.getMouseCanvasPosition();
 		for (TileObject tileObject : objects)
 		{
-			if(tileObject.getPlane() == client.getPlane())
+			if (tileObject.getPlane() == client.getPlane())
 			{
 				OverlayUtil.renderHoverableArea(graphics, tileObject.getClickbox(), mousePosition,
 					CLICKBOX_FILL_COLOR, CLICKBOX_BORDER_COLOR, CLICKBOX_HOVER_BORDER_COLOR);
-//			if(this.iconItemID != -1) {
-//				LocalPoint lp = LocalPoint.fromWorld(client, worldPoint);
-//				if(lp == null) {
-//					return;
-//				}
-//				OverlayUtil.renderTileOverlay(client, graphics, lp, itemManager.getImage(this.iconItemID), Color.CYAN);
-//			}
+			}
+		}
+
+		if (iconItemID != -1 && object != null) {
+			LocalPoint lp = LocalPoint.fromWorld(client, object.getWorldLocation());
+			if (lp != null)
+			{
+				System.out.println("IN THE THING");
+				addItemImageToLocation(graphics, lp);
 			}
 		}
 	}

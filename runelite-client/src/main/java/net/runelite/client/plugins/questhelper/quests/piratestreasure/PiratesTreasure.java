@@ -135,5 +135,4 @@ public class PiratesTreasure extends BasicQuestHelper
 
 		return allSteps;
 	}
-
 }

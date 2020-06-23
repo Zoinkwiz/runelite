@@ -310,7 +310,11 @@ class QuestHelperPanel extends PluginPanel
 				{
 					text.append("<br>");
 				}
-				text.append(itemRequirement.getQuantity()).append(" x ").append(itemRequirement.getName());
+				if (itemRequirement.showQuantity())
+				{
+					text.append(itemRequirement.getQuantity()).append(" x ");
+				}
+				text.append(itemRequirement.getName());
 			}
 		} else {
 			text.append("None");
@@ -335,7 +339,11 @@ class QuestHelperPanel extends PluginPanel
 				{
 					textRecommended.append("<br>");
 				}
-				textRecommended.append(itemRequirement.getQuantity()).append(" x ").append(itemRequirement.getName());
+				if (itemRequirement.showQuantity())
+				{
+					textRecommended.append(itemRequirement.getQuantity()).append(" x ");
+				}
+				textRecommended.append(itemRequirement.getName());
 			}
 		}
 

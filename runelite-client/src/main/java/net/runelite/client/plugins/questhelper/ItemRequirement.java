@@ -88,6 +88,14 @@ public class ItemRequirement
 		this.name = name;
 	}
 
+	public boolean showQuantity() {
+		return quantity != -1;
+	}
+
+	public boolean isActualItem() {
+		return id != -1;
+	}
+
 	public String getName()
 	{
 		return name;
