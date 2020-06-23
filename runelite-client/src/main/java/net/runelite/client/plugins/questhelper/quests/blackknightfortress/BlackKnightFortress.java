@@ -88,7 +88,7 @@ public class BlackKnightFortress extends BasicQuestHelper
 
 		steps.put(2, sabotageThePotion);
 
-		steps.put(3, useCabbageOnHole);
+		steps.put(3, returnToAmik);
 
 		return steps;
 	}
