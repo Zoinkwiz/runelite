@@ -52,7 +52,7 @@ public class PiratesTreasure extends BasicQuestHelper
 	private NpcTalkStep speakToRedbeard;
 	private RumSmugglingStep smuggleRum;
 	private QuestStep readPirateMessage;
-	private QuestStep openChest;
+	private ObjectStep openChest;
 	private QuestStep digUpTreasure;
 
 	@Override
@@ -85,6 +85,7 @@ public class PiratesTreasure extends BasicQuestHelper
                 "Open the chest upstairs in The Blue Moon Inn in Varrock by using the key on it.",
                 chestKey);
 		openChest.addDialogStep("Ok thanks, I'll go and get it.");
+		openChest.addIcon(ItemID.CHEST_KEY);
 
         ConditionalStep getTreasureMap = new ConditionalStep(this, openChest);
         getTreasureMap.addStep(hasPirateMessage, readPirateMessage);

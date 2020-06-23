@@ -64,6 +64,9 @@ public abstract class QuestStep implements Module
 
 	private int currentChoice = 0;
 
+	protected int iconItemID;
+	protected BufferedImage itemIcon;
+
 	@Getter
 	protected final QuestHelper questHelper;
 
@@ -116,6 +119,11 @@ public abstract class QuestStep implements Module
 			.left(text)
 			.leftColor(TITLED_CONTENT_COLOR)
 			.build());
+	}
+
+	public void addIcon(int iconItemID)
+	{
+		this.iconItemID = iconItemID;
 	}
 
 	public void makeWorldOverlayHint(Graphics2D graphics, QuestHelperPlugin plugin)

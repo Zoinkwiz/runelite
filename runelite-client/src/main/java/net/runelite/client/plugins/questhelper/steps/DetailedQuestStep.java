@@ -71,9 +71,6 @@ public class DetailedQuestStep extends QuestStep
 	protected List<ItemRequirement> itemRequirements = new ArrayList<>();
 	protected HashMap<Integer, List<Tile>> tileHighlights = new HashMap<>();
 
-	protected int iconItemID;
-	protected BufferedImage itemIcon;
-
 	protected HashMap<Tile, List<Integer>> newTileHighlights = new HashMap<>();
 
 	protected static final int MAX_DISTANCE = 2350;
@@ -248,10 +245,6 @@ public class DetailedQuestStep extends QuestStep
 		newTileHighlights.forEach((tile, ids) -> {
 			checkAllTilesForHighlighting(tile, ids, graphics);
 		});
-	}
-
-	public void addIcon(int iconItemID) {
-		this.iconItemID = iconItemID;
 	}
 
 	private void addIconImage() {

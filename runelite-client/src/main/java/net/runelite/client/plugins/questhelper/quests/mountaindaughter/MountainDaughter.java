@@ -222,14 +222,17 @@ public class MountainDaughter extends BasicQuestHelper
 		rubMudIntoTree = new ObjectStep(this, ObjectID.TALL_TREE, new WorldPoint(2772, 3679, 0),
 			"Use mud on the Tall Tree on the lake north of the camp, and then climb it.",
 			pole, mud, plank);
+		rubMudIntoTree.addIcon(ItemID.MUD);
 
 		poleVaultRocks = new ObjectStep(this, ObjectID.CLUMP_OF_ROCKS, new WorldPoint(2773, 3688, 0),
 			"Use your pole or a staff on the clump of rocks.",
 			pole, plank);
+		poleVaultRocks.addIcon(ItemID.POLE);
 
 		plankRocks = new ObjectStep(this, ObjectID.FLAT_STONE, new WorldPoint(2775, 3691, 0),
 			"Use a plank on the flat stone.",
 			plank);
+		plankRocks.addIcon(ItemID.PLANK);
 
 		listenToSpirit = new ObjectStep(this, ObjectID.SHINING_POOL_5897, new WorldPoint(2781, 3689, 0),
 			"Listen to the Shining Pool.");
@@ -242,6 +245,7 @@ public class MountainDaughter extends BasicQuestHelper
 			"Use a plank on the flat stone to return to shore.",
 			plank);
 		plankRocksReturn.addDialogStep("Yes.");
+		plankRocksReturn.addIcon(ItemID.PLANK);
 
 		talkToHamalAfterSpirit = new NpcTalkStep(this, NpcID.HAMAL_THE_CHIEFTAIN, new WorldPoint(2810, 3672, 0),
 			"Speak to Hamal the Chieftain in the Mountain Camp.",
@@ -265,6 +269,7 @@ public class MountainDaughter extends BasicQuestHelper
 		getRockFragment = new ObjectStep(this, ObjectID.ANCIENT_ROCK, new WorldPoint(2799, 3660, 0),
 			"Use a pickaxe on the Ancient Rock in the Mountain Camp.",
 			pickaxe);
+		getRockFragment.addIcon(ItemID.BRONZE_PICKAXE);
 
 		returnToBrundt = new NpcTalkStep(this, NpcID.BRUNDT_THE_CHIEFTAIN_9263, new WorldPoint(2658, 3669, 0),
 			"Return to Brundt the Chieftain in the Rellekka's longhall.",
@@ -331,6 +336,7 @@ public class MountainDaughter extends BasicQuestHelper
 		createCairn = new ObjectStep(this, ObjectID.BURIAL_MOUND, new WorldPoint(2783, 3694, 0),
 			"Use the Muddy rocks on the Burial Mound at the centre of the Mountain Camp's lake.",
 			muddyRocks);
+		createCairn.addIcon(ItemID.MUDDY_ROCK);
 	}
 
 	@Override

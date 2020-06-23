@@ -92,7 +92,6 @@ public class ObjectStep extends DetailedQuestStep
 		}
 	}
 
-
 	@Override
 	public void shutDown() {
 		super.shutDown();

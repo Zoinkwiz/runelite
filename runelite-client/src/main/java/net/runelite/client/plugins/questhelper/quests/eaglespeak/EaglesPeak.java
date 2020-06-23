@@ -226,6 +226,7 @@ public class EaglesPeak extends BasicQuestHelper
 
 		useFeatherOnDoor = new ObjectStep(this, ObjectID.ROCKY_OUTCROP_19925, new WorldPoint(2328, 3494, 0),
 			"Use the Metal Feather on the Rocky Outcrop on Eagles' Peak.", metalFeather);
+		useFeatherOnDoor.addIcon(ItemID.METAL_FEATHER);
 
 		enterPeak = new ObjectStep(this, NullObjectID.NULL_19790, new WorldPoint(2328, 3494, 0),
 			"Enter Eagles' Peak through the Rocky Outcrop.");
@@ -298,23 +299,31 @@ public class EaglesPeak extends BasicQuestHelper
 
 		fillFeeder1 = new ObjectStep(this, ObjectID.BIRD_FEEDER_19939, new WorldPoint(1966, 4890, 2),
 			"Use the odd bird seed on the Bird feeder in the far south eastern corner.");
+		fillFeeder1.addIcon(ItemID.ODD_BIRD_SEED);
 
 		fillFeeder2 = new ObjectStep(this, ObjectID.BIRD_FEEDER_19938, new WorldPoint(1962, 4894, 2),
 			"Use the odd bird seed on the marked Bird feeder.");
+		fillFeeder2.addIcon(ItemID.ODD_BIRD_SEED);
 
 		/* Only needed if the player's messed up */
 		fillFeeder3 = new ObjectStep(this, ObjectID.BIRD_FEEDER_19943, new WorldPoint(1962, 4901, 2),
 			"Use the odd bird seed on the marked Bird feeder, as you've moved the wrong bird.");
+		fillFeeder3.addIcon(ItemID.ODD_BIRD_SEED);
 
 		fillFeeder4 = new ObjectStep(this, ObjectID.BIRD_FEEDER_19937, new WorldPoint(1947, 4898, 2), "Put odd bird feed into the feeder in the north east of the room.");
+		fillFeeder4.addIcon(ItemID.ODD_BIRD_SEED);
 
 		fillFeeder5 = new ObjectStep(this, ObjectID.BIRD_FEEDER_19936, new WorldPoint(1945, 4915, 2), "Put odd bird feed into the feeder in the south of the room.");
+		fillFeeder5.addIcon(ItemID.ODD_BIRD_SEED);
 
 		fillFeeder6 = new ObjectStep(this, ObjectID.BIRD_FEEDER_19941, new WorldPoint(1935, 4897, 2), "Put odd bird feed into the feeder in the south west of the room");
+		fillFeeder6.addIcon(ItemID.ODD_BIRD_SEED);
 
 		fillFeeder4Again = new ObjectStep(this, ObjectID.BIRD_FEEDER_19937, new WorldPoint(1947, 4898, 2), "Put odd bird feed into the feeder in the south of the room.");
+		fillFeeder4Again.addIcon(ItemID.ODD_BIRD_SEED);
 
 		fillFeeder7 = new ObjectStep(this, ObjectID.BIRD_FEEDER_19940, new WorldPoint(1931, 4916, 2), "Put odd bird feed in the feeder in the north west of the room.");
+		fillFeeder7.addIcon(ItemID.ODD_BIRD_SEED);
 
 		grabGoldFeather = new ObjectStep(this, ObjectID.STONE_PEDESTAL_19950, new WorldPoint(1928, 4907, 2), "Grab the Golden feather from the pedestal.");
 
@@ -322,18 +331,25 @@ public class EaglesPeak extends BasicQuestHelper
 
 		useFeathersOnStoneDoor = new ObjectStep(this, ObjectID.STONE_DOOR_19916, new WorldPoint(2003, 4948, 3), "Use all three feathers on the door.",
 			goldFeather, silverFeather, bronzeFeather);
+		useFeathersOnStoneDoor.addIcon(ItemID.GOLDEN_FEATHER);
 		useBronzeFeathersOnStoneDoor = new ObjectStep(this, ObjectID.STONE_DOOR_19916, new WorldPoint(2003, 4948, 3), "Use the bronze feather on the door.",
 			bronzeFeather);
+		useBronzeFeathersOnStoneDoor.addIcon(ItemID.BRONZE_FEATHER);
 		useSilverFeathersOnStoneDoor = new ObjectStep(this, ObjectID.STONE_DOOR_19918, new WorldPoint(2003, 4948, 3), "Use the silver feather on the door.",
 			silverFeather);
+		useSilverFeathersOnStoneDoor.addIcon(ItemID.SILVER_FEATHER);
 		useGoldFeathersOnStoneDoor = new ObjectStep(this, ObjectID.STONE_DOOR_19917, new WorldPoint(2003, 4948, 3), "Use the golden feather on the door.", true,
 			goldFeather);
+		useGoldFeathersOnStoneDoor.addIcon(ItemID.GOLDEN_FEATHER);
 		useBronzeSilverFeathersOnStoneDoor = new ObjectStep(this, ObjectID.STONE_DOOR_19916, new WorldPoint(2003, 4948, 3), "Use the bronze and silver feathers on the door.",
 			silverFeather, bronzeFeather);
+		useBronzeSilverFeathersOnStoneDoor.addIcon(ItemID.SILVER_FEATHER);
 		useGoldBronzeFeathersOnStoneDoor = new ObjectStep(this, ObjectID.STONE_DOOR_19916, new WorldPoint(2003, 4948, 3), "Use the bronze and golden feathers on the door.",
 			goldFeather, bronzeFeather);
+		useGoldBronzeFeathersOnStoneDoor.addIcon(ItemID.GOLDEN_FEATHER);
 		useGoldSilverFeathersOnStoneDoor = new ObjectStep(this, ObjectID.STONE_DOOR_19917, new WorldPoint(2003, 4948, 3), "Use the silver and golden feathers on the door.",
 			goldFeather, silverFeather, bronzeFeather);
+		useGoldSilverFeathersOnStoneDoor.addIcon(ItemID.GOLDEN_FEATHER);
 
 		sneakPastEagle = new NpcTalkStep(this, NpcID.EAGLE, new WorldPoint(2008, 4955, 3),
 			"Go through the feather door and sneak past the Eagle whilst wearing your eagle disguise.",
