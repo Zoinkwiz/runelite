@@ -104,6 +104,7 @@ public class MisthalinMystery extends BasicQuestHelper
 
 		ConditionalStep pinkDoor = new ConditionalStep(this, takeTheBoat);
 		pinkDoor.addStep(hasKnife, tryToOpenPinkKnobDoor);
+		pinkDoor.addStep(onIsland, takeKnife);
 
 		steps.put(30, pinkDoor);
 
