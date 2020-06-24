@@ -28,13 +28,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import net.runelite.api.Client;
+import net.runelite.api.ItemID;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.plugins.questhelper.steps.conditional.VarbitCondition.Operation;
 import net.runelite.client.plugins.questhelper.ItemRequirement;
 import net.runelite.client.plugins.questhelper.ItemRequirements;
 
 public class ItemRequirementCondition extends ConditionForStep
 {
 	private final List<ItemRequirement> itemRequirements;
+
+	private Operation comparisonType;
+	private int compareValue;
 
 	public ItemRequirementCondition(ItemRequirement... itemRequirements)
 	{
@@ -43,11 +48,21 @@ public class ItemRequirementCondition extends ConditionForStep
 		this.logicType = LogicType.AND;
 	}
 
-	public ItemRequirementCondition(LogicType logicType, ItemRequirement... itemRequirements)
+	public ItemRequirementCondition(LogicType logicType,  ItemRequirement... itemRequirements)
 	{
 		this.itemRequirements = new ArrayList<>();
 		this.itemRequirements.addAll(Arrays.asList(itemRequirements));
 		this.logicType = logicType;
+	}
+
+
+	public ItemRequirementCondition(Operation operation, int compareValue, ItemRequirement... itemRequirements)
+	{
+		this.itemRequirements = new ArrayList<>();
+		this.itemRequirements.addAll(Arrays.asList(itemRequirements));
+		this.logicType = LogicType.AND;
+		this.compareValue = compareValue;
+		this.comparisonType = operation;
 	}
 
 	@Override
@@ -61,14 +76,19 @@ public class ItemRequirementCondition extends ConditionForStep
 				successes++;
 			}
 		}
-		if ((successes == itemRequirements.size() && logicType == LogicType.AND)
-			|| (successes > 0 && logicType == LogicType.OR)
-			|| (successes < itemRequirements.size() && logicType == LogicType.NAND)
-			|| (successes == 0 && logicType == LogicType.NOR))
-		{
-			return true;
+		if (comparisonType != null) {
+			if (comparisonType == Operation.EQUAL) {
+				return successes == compareValue;
+			} else if (comparisonType == Operation.GREATER_EQUAL) {
+				return successes >= compareValue;
+			} else if (comparisonType == Operation.LESS_EQUAL) {
+				return successes <= compareValue;
+			}
 		}
 
-		return false;
+		return (successes == itemRequirements.size() && logicType == LogicType.AND)
+			|| (successes > 0 && logicType == LogicType.OR)
+			|| (successes < itemRequirements.size() && logicType == LogicType.NAND)
+			|| (successes == 0 && logicType == LogicType.NOR);
 	}
 }

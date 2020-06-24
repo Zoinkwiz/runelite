@@ -57,6 +57,19 @@ public class PanelDetails {
 		this.itemRequirements = new ArrayList<>(Arrays.asList(itemRequirements));
 	}
 
+	public boolean checkSteps(QuestStep step) {
+		if (steps.contains(step)) {
+			return true;
+		}
+
+		for (QuestStep questStep : steps) {
+			if (questStep.getSubsteps().contains(step)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public void addSteps(QuestStep... steps) {
 		this.steps.addAll(Arrays.asList(steps));
 	}

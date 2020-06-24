@@ -129,6 +129,12 @@ public class QuestStepPanel extends JPanel
 
 		for(QuestStep step : panelDetails.getSteps())
 		{
+			if (!step.isShowInSidebar())
+			{
+				steps.put(step, null);
+				continue;
+			}
+
 			JLabel questStepLabel = new JLabel();
 			questStepLabel.setLayout(new BorderLayout());
 			questStepLabel.setBorder(new EmptyBorder(0, 0, 10, 0));
@@ -137,9 +143,6 @@ public class QuestStepPanel extends JPanel
 
 			StringBuilder text = new StringBuilder();
 
-//			if(!text.toString().equals("")) {
-//				text.append("<br><br>");
-//			}
 			if(step.equals(currentStep)) {
 				questStepLabel.setForeground(ColorScheme.BRAND_ORANGE);
 			}
@@ -165,15 +168,22 @@ public class QuestStepPanel extends JPanel
     	return new ArrayList<>(steps.keySet());
 	}
 
-    public void updateHighlight(QuestStep currentStep) {
-    	if (currentlyHighlighted != null)
+    public void updateHighlight(QuestStep currentStep)
+	{
+		if (currentlyHighlighted != null)
 		{
 			steps.get(currentlyHighlighted).setForeground(Color.WHITE);
-		} else {
+		}
+		else
+		{
 			headerLabel.setForeground(Color.BLACK);
 			headerPanel.setBackground(ColorScheme.BRAND_ORANGE);
 		}
-		steps.get(currentStep).setForeground(ColorScheme.BRAND_ORANGE);
+
+		if (steps.get(currentStep) != null)
+		{
+			steps.get(currentStep).setForeground(ColorScheme.BRAND_ORANGE);
+		}
 		currentlyHighlighted = currentStep;
 	}
 
@@ -185,7 +195,10 @@ public class QuestStepPanel extends JPanel
 				applyDimmer(false, headerPanel);
 			}
     		headerPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
-    		steps.get(currentlyHighlighted).setForeground(Color.WHITE);
+			if(steps.get(currentlyHighlighted) != null)
+			{
+				steps.get(currentlyHighlighted).setForeground(Color.WHITE);
+			}
     		currentlyHighlighted = null;
 		}
 	}

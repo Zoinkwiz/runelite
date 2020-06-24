@@ -274,11 +274,17 @@ class QuestHelperPanel extends PluginPanel
     public void updateHighlight(QuestStep newStep)
 	{
 		questStepPanelList.forEach(panel -> {
-			if (panel.getSteps().contains(newStep))
+			boolean highlighted = false;
+			for (QuestStep step : panel.getSteps())
 			{
-				panel.updateHighlight(newStep);
+				if (step == newStep || step.getSubsteps().contains(newStep))
+				{
+					highlighted = true;
+					panel.updateHighlight(step);
+					break;
+				}
 			}
-			else
+			if (!highlighted)
 			{
 				panel.removeHighlight();
 			}

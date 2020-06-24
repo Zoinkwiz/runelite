@@ -118,7 +118,7 @@ public class ItemRequirement
 
 			for (Item item : equippedItems)
 			{
-				if (item.getId() == id || alternates.contains(id))
+				if (item.getId() == id || alternates.contains(item.getId()))
 				{
 					if (item.getQuantity() >= tempQuantity)
 					{
@@ -139,7 +139,7 @@ public class ItemRequirement
 				Item[] inventoryItems = inventory.getItems();
 				for (Item item : inventoryItems)
 				{
-					if (item.getId() == id || alternates.contains(id))
+					if (item.getId() == id || alternates.contains(item.getId()))
 					{
 						if (item.getQuantity() >= tempQuantity)
 						{

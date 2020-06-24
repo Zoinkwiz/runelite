@@ -29,6 +29,8 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Client;
@@ -75,6 +77,13 @@ public abstract class QuestStep implements Module
 	@Getter
 	protected DialogChoiceSteps choices = new DialogChoiceSteps();
 
+	@Getter
+	private ArrayList<QuestStep> substeps = new ArrayList<>();
+
+	@Getter
+	@Setter
+	private boolean showInSidebar = true;
+
 	public QuestStep(QuestHelper questHelper, String text)
 	{
 		this.text = text;
@@ -92,6 +101,10 @@ public abstract class QuestStep implements Module
 
 	public void shutDown()
 	{
+	}
+
+	public void addSubSteps(QuestStep... substep) {
+		this.substeps.addAll(Arrays.asList(substep));
 	}
 
 	@Subscribe
