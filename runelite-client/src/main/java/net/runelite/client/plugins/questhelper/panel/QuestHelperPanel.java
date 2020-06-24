@@ -319,7 +319,9 @@ class QuestHelperPanel extends PluginPanel
 				}
 				text.append(itemRequirement.getName());
 			}
-		} else {
+		}
+		else
+		{
 			text.append("None");
 		}
 

@@ -30,8 +30,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import net.runelite.api.ChatMessageType;
+import net.runelite.api.GameState;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.NpcDespawned;
+import net.runelite.api.events.NpcSpawned;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.questhelper.QuestHelperPlugin;
@@ -39,6 +43,7 @@ import net.runelite.client.plugins.questhelper.questhelpers.QuestHelper;
 import net.runelite.client.plugins.questhelper.steps.conditional.ChatMessageCondition;
 import net.runelite.client.plugins.questhelper.steps.conditional.ConditionForStep;
 import net.runelite.client.plugins.questhelper.steps.conditional.Conditions;
+import net.runelite.client.plugins.questhelper.steps.conditional.NpcCondition;
 import net.runelite.client.plugins.questhelper.steps.conditional.OwnerStep;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 
@@ -53,6 +58,7 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 
 	protected final LinkedHashMap<Conditions, QuestStep> steps;
 	protected final ArrayList<ChatMessageCondition> chatConditions = new ArrayList<>();
+	protected final ArrayList<NpcCondition> npcConditions = new ArrayList<>();
 
 	private QuestStep currentStep;
 
@@ -67,12 +73,14 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 	{
 		this.steps.put(conditions, step);
 		checkForChatConditions(conditions);
+		checkForNpcConditions(conditions);
 	}
 
 	public void addStep(ConditionForStep condition, QuestStep step)
 	{
 		this.steps.put(new Conditions(condition), step);
 		checkForChatConditions(condition);
+		checkForNpcConditions(condition);
 	}
 
 	public void checkForChatConditions(ConditionForStep condition)
@@ -93,9 +101,33 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 		}
 	}
 
+	public void checkForNpcConditions(ConditionForStep condition) {
+		if (condition != null && condition.getConditions() == null)
+		{
+			if (condition.getClass() == NpcCondition.class && !npcConditions.contains(condition))
+			{
+				npcConditions.add((NpcCondition) condition);
+			}
+		}
+		else
+		{
+			for (ConditionForStep subCondition : condition.getConditions())
+			{
+				checkForNpcConditions(subCondition);
+			}
+		}
+	}
+
 	@Override
 	public void startUp()
 	{
+		for (Conditions conditions : steps.keySet())
+		{
+			if (conditions != null)
+			{
+				conditions.initialize(client);
+			}
+		}
 		updateSteps();
 		started = true;
 	}
@@ -118,6 +150,23 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 	}
 
 	@Subscribe
+	public void onGameStateChanged(final GameStateChanged event)
+	{
+		System.out.println("EVENT CHANGE DETECTED");
+		System.out.println(event.getGameState());
+		if (event.getGameState() == GameState.LOADING || event.getGameState() == GameState.HOPPING)
+		{
+			for (Conditions conditions : steps.keySet())
+			{
+				if (conditions != null)
+				{
+					conditions.loadingHandler();
+				}
+			}
+		}
+	}
+
+	@Subscribe
 	public void onChatMessage(ChatMessage chatMessage)
 	{
 		if (chatMessage.getType() == ChatMessageType.GAMEMESSAGE)
@@ -126,6 +175,24 @@ public class ConditionalStep extends QuestStep implements OwnerStep
 			{
 				step.validateCondition(chatMessage.getMessage());
 			}
+		}
+	}
+
+	@Subscribe
+	public void onNpcSpawned(NpcSpawned event)
+	{
+		for (NpcCondition condition : npcConditions)
+		{
+			condition.checkNpcSpawned(event.getNpc().getId());
+		}
+	}
+
+	@Subscribe
+	public void onNpcDespawned(NpcDespawned event)
+	{
+		for (NpcCondition condition : npcConditions)
+		{
+			condition.checkNpcDespawned(event.getNpc().getId());
 		}
 	}
 

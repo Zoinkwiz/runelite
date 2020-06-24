@@ -24,17 +24,22 @@
  */
 package net.runelite.client.plugins.questhelper.steps.conditional;
 
+import com.google.common.primitives.Ints;
+import java.util.Collection;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
 import net.runelite.api.NullObjectID;
+import net.runelite.api.ObjectComposition;
 import net.runelite.api.ObjectID;
 import static net.runelite.api.Perspective.SCENE_SIZE;
 import net.runelite.api.Point;
 import net.runelite.api.Tile;
+import net.runelite.api.TileObject;
+import net.runelite.api.coords.WorldPoint;
 
 public class ObjectCondition extends ConditionForStep
 {
-	private int objectID;
+	private final int objectID;
 
 	public ObjectCondition(int objectID) {
 		this.objectID = objectID;
@@ -53,20 +58,26 @@ public class ObjectCondition extends ConditionForStep
 					continue;
 				}
 
-				GameObject[] gameObjects = tiles[x][y].getGameObjects();
-
-				if (gameObjects != null)
+				for (GameObject object : tiles[x][y].getGameObjects())
 				{
-					for (int i = 0; i < gameObjects.length; i++)
-					{
-						if(gameObjects[i] != null && gameObjects[i].getId() == objectID) {
-							return true;
-						}
-					}
+					if (checkForObjects(object)) return true;
 				}
+				if (checkForObjects(tiles[x][y].getDecorativeObject())) return true;
+				if (checkForObjects(tiles[x][y].getGroundObject())) return true;
+				if (checkForObjects(tiles[x][y].getWallObject())) return true;
 			}
 		}
 
 		return false;
+	}
+
+	private boolean checkForObjects(TileObject object)
+	{
+		return object != null && object.getId() == objectID;
+	}
+
+	@Override
+	public void loadingHandler() {
+		// Once this has checks done in ConditionalStep, thi will need to set the boolean condition to false
 	}
 }

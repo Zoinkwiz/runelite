@@ -24,6 +24,7 @@
  */
 package net.runelite.client.plugins.questhelper.steps.conditional;
 
+import ch.qos.logback.core.joran.conditional.Condition;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +49,15 @@ public class Conditions extends ConditionForStep
 		Collections.addAll(this.conditions, conditions);
 		this.onlyNeedToPassOnce = onlyNeedToPassOnce;
 		this.logicType = logicType;
+	}
+
+	@Override
+	public void initialize(Client client)
+	{
+		for (ConditionForStep condition : conditions)
+		{
+			condition.initialize(client);
+		}
 	}
 
 	@Override
@@ -77,5 +87,14 @@ public class Conditions extends ConditionForStep
 		}
 
 		return false;
+	}
+
+	@Override
+	public void loadingHandler()
+	{
+		for (ConditionForStep condition : conditions)
+		{
+			condition.loadingHandler();
+		}
 	}
 }

@@ -41,4 +41,12 @@ public abstract class ConditionForStep
 	protected ArrayList<ConditionForStep> conditions;
 
 	abstract public boolean checkCondition(Client client);
+
+	public void initialize(Client client)
+	{
+	}
+
+	public void loadingHandler()
+	{
+	}
 }
