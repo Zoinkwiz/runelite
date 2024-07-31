@@ -36,6 +36,8 @@ import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import lombok.Getter;
 import net.runelite.api.annotations.Component;
 import net.runelite.api.annotations.Interface;
 import net.runelite.api.annotations.VarCInt;
@@ -2285,4 +2287,7 @@ public interface Client extends OAuthApi, GameEngine
 	{
 		return getTopLevelWorldView().getSelectedSceneTile();
 	}
+
+	CameraDetails fakeCamera = new CameraDetails();
+
 }

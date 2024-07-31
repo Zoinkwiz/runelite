@@ -55,9 +55,9 @@ public class CameraOverlay extends OverlayPanel
 
 		panelComponent.setPreferredSize(new Dimension(175, 0));
 
-		int camX = client.getCameraX();
-		int camY = client.getCameraZ();
-		int camZ = client.getCameraY();
+		int camX = client.fakeCamera.getCameraX(client);
+		int camY = client.fakeCamera.getCameraZ(client);
+		int camZ = client.fakeCamera.getCameraY(client);
 
 		panelComponent.getChildren().add(LineComponent.builder()
 				.left("Camera")

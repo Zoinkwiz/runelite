@@ -128,9 +128,9 @@ public class Perspective
 		if (x >= -ESCENE_OFFSET << LOCAL_COORD_BITS && y >= -ESCENE_OFFSET << LOCAL_COORD_BITS &&
 			x <= SCENE_SIZE + ESCENE_OFFSET << LOCAL_COORD_BITS && y <= SCENE_SIZE + ESCENE_OFFSET << LOCAL_COORD_BITS)
 		{
-			x -= client.getCameraX();
-			y -= client.getCameraY();
-			z -= client.getCameraZ();
+			x -= client.fakeCamera.getCameraX(client);
+			y -= client.fakeCamera.getCameraY(client);
+			z -= client.fakeCamera.getCameraZ(client);
 
 			final int cameraPitch = client.getCameraPitch();
 			final int cameraYaw = client.getCameraYaw();
@@ -171,9 +171,9 @@ public class Perspective
 				cameraYaw = client.getCameraFpYaw();
 
 			final float
-				fx = x - (float) client.getCameraFpX(),
-				fy = y - (float) client.getCameraFpY(),
-				fz = z - (float) client.getCameraFpZ(),
+				fx = x - (float) client.fakeCamera.getCameraFpX(client),
+				fy = y - (float) client.fakeCamera.getCameraFpY(client),
+				fz = z - (float) client.fakeCamera.getCameraFpZ(client),
 				pitchSin = (float) Math.sin(cameraPitch),
 				pitchCos = (float) Math.cos(cameraPitch),
 				yawSin = (float) Math.sin(cameraYaw),
@@ -230,9 +230,9 @@ public class Perspective
 			rotateSin = SINE[rotate] / 65536.0f,
 			rotateCos = COSINE[rotate] / 65536.0f,
 
-			cx = x3dCenter - (float) client.getCameraFpX(),
-			cy = y3dCenter - (float) client.getCameraFpY(),
-			cz = z3dCenter - (float) client.getCameraFpZ(),
+			cx = x3dCenter - (float) client.fakeCamera.getCameraFpX(client),
+			cy = y3dCenter - (float) client.fakeCamera.getCameraFpY(client),
+			cz = z3dCenter - (float) client.fakeCamera.getCameraFpZ(client),
 
 			viewportXMiddle = client.getViewportWidth() / 2f,
 			viewportYMiddle = client.getViewportHeight() / 2f,
@@ -295,9 +295,9 @@ public class Perspective
 			rotateSin = SINE[rotate],
 			rotateCos = COSINE[rotate],
 
-			cx = x3dCenter - client.getCameraX(),
-			cy = y3dCenter - client.getCameraY(),
-			cz = z3dCenter - client.getCameraZ(),
+			cx = x3dCenter - client.fakeCamera.getCameraX(client),
+			cy = y3dCenter - client.fakeCamera.getCameraY(client),
+			cz = z3dCenter - client.fakeCamera.getCameraZ(client),
 
 			viewportXMiddle = client.getViewportWidth() / 2,
 			viewportYMiddle = client.getViewportHeight() / 2,

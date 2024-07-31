@@ -131,8 +131,8 @@ public class SkyboxPlugin extends Plugin
 		}
 
 		// Inverse of camera location / 2
-		int spx = -((client.getCameraX() - px) >> 1);
-		int spy = -((client.getCameraY() - py) >> 1);
+		int spx = -((client.fakeCamera.getCameraX(client) - px) >> 1);
+		int spy = -((client.fakeCamera.getCameraY(client) - py) >> 1);
 
 		int baseX = client.getBaseX();
 		int baseY = client.getBaseY();

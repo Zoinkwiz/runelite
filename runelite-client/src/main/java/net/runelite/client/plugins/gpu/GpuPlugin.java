@@ -38,25 +38,14 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.BufferProvider;
-import net.runelite.api.Client;
-import net.runelite.api.Constants;
-import net.runelite.api.GameState;
-import net.runelite.api.IntProjection;
-import net.runelite.api.Model;
-import net.runelite.api.Perspective;
-import net.runelite.api.Projection;
-import net.runelite.api.Renderable;
-import net.runelite.api.Scene;
-import net.runelite.api.SceneTileModel;
-import net.runelite.api.SceneTilePaint;
-import net.runelite.api.Texture;
-import net.runelite.api.TextureProvider;
-import net.runelite.api.TileObject;
+import net.runelite.api.*;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.hooks.DrawCallbacks;
 import net.runelite.client.callback.ClientThread;
@@ -445,6 +434,8 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 			client.setDrawCallbacks(null);
 			client.setUnlockedFps(false);
 			client.setExpandedMapLoading(0);
+
+			client.fakeCamera.reset();
 
 			sceneUploader.releaseSortingBuffers();
 
@@ -877,9 +868,14 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 	@Override
 	public void drawScene(double cameraX, double cameraY, double cameraZ, double cameraPitch, double cameraYaw, int plane)
 	{
-		this.cameraX = cameraX;
-		this.cameraY = cameraY;
-		this.cameraZ = cameraZ;
+		int[] fps = firstPersonCameraPosition();
+		client.fakeCamera.setX(fps[0]);
+		client.fakeCamera.setY(fps[2]);
+		client.fakeCamera.setZ(fps[1]);
+		this.cameraX = client.fakeCamera.getCameraFpX(client);
+		this.cameraZ = client.fakeCamera.getCameraFpY(client);
+		this.cameraY = client.fakeCamera.getCameraFpZ(client);
+
 		this.cameraPitch = cameraPitch;
 		this.cameraYaw = cameraYaw;
 		viewportOffsetX = client.getViewportXOffset();
@@ -905,9 +901,9 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 			.put(client.getCenterX())
 			.put(client.getCenterY())
 			.put(client.getScale())
-			.put(Float.floatToIntBits((float) cameraX))
-			.put(Float.floatToIntBits((float) cameraY))
-			.put(Float.floatToIntBits((float) cameraZ));
+			.put(Float.floatToIntBits((float) this.cameraX))
+			.put(Float.floatToIntBits((float) this.cameraY))
+			.put(Float.floatToIntBits((float) this.cameraZ));
 		uniformBuf.flip();
 
 		updateBuffer(uniformBuffer, GL43C.GL_UNIFORM_BUFFER, uniformBuf, GL43C.GL_DYNAMIC_DRAW, CL12.CL_MEM_READ_ONLY);
@@ -1077,9 +1073,43 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 		}
 	}
 
+	Map<SceneTileModel, int[]> tileModelsX = new HashMap<>();
+	Map<SceneTileModel, int[]> tileModelsY = new HashMap<>();
+	Map<SceneTileModel, int[]> tileModelsZ = new HashMap<>();
+
 	@Override
-	public void drawSceneTileModel(Scene scene, SceneTileModel model, int tileX, int tileY)
-	{
+	public void drawSceneTileModel(Scene scene, SceneTileModel model, int tileX, int tileY) {
+		if (!tileModelsX.containsKey(model)) {
+			tileModelsX.put(model, model.getVertexX().clone());
+			tileModelsY.put(model, model.getVertexY().clone());
+			tileModelsZ.put(model, model.getVertexZ().clone());
+		}
+
+		int[] originalX = tileModelsX.get(model);
+		int[] originalY = tileModelsY.get(model);
+		int[] originalZ = tileModelsZ.get(model);
+
+		// Reset to original coordinates
+		System.arraycopy(originalX, 0, model.getVertexX(), 0, originalX.length);
+		System.arraycopy(originalY, 0, model.getVertexY(), 0, originalY.length);
+		System.arraycopy(originalZ, 0, model.getVertexZ(), 0, originalZ.length);
+
+		// Get new camera position
+		int[] cameraShift = new int[3];
+		cameraShift[0] = client.getCameraX() - client.fakeCamera.getCameraX(client);
+		cameraShift[1] = client.fakeCamera.getCameraY(client) - client.getCameraY(); // Up/Down
+		cameraShift[2] = client.getCameraZ() - client.fakeCamera.getCameraZ(client); // Left/Right
+		System.out.println(cameraShift[0]);
+		System.out.println(cameraShift[1]);
+		System.out.println(cameraShift[2]);
+		System.out.println("-----");
+		// Apply new camera position adjustments
+		for (int i = 0; i < model.getVertexX().length; i++) {
+//			model.getVertexX()[i] -= cameraShift[0];
+//			model.getVertexY()[i] -= cameraShift[1];
+//			model.getVertexZ()[i] -= cameraShift[2];
+		}
+
 		if (computeMode == ComputeMode.NONE)
 		{
 			targetBufferOffset += sceneUploader.upload(model,
@@ -1597,12 +1627,12 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 	public boolean tileInFrustum(Scene scene, int pitchSin, int pitchCos, int yawSin, int yawCos, int cameraX, int cameraY, int cameraZ, int plane, int msx, int msy)
 	{
 		int[][][] tileHeights = scene.getTileHeights();
-		int x = ((msx - SCENE_OFFSET) << Perspective.LOCAL_COORD_BITS) + 64 - cameraX;
-		int z = ((msy - SCENE_OFFSET) << Perspective.LOCAL_COORD_BITS) + 64 - cameraZ;
+		int x = ((msx - SCENE_OFFSET) << Perspective.LOCAL_COORD_BITS) + 64 - client.fakeCamera.getCameraX(client);
+		int z = ((msy - SCENE_OFFSET) << Perspective.LOCAL_COORD_BITS) + 64 - client.fakeCamera.getCameraY(client);
 		int y = Math.max(
 			Math.max(tileHeights[plane][msx][msy], tileHeights[plane][msx][msy + 1]),
 			Math.max(tileHeights[plane][msx + 1][msy], tileHeights[plane][msx + 1][msy + 1])
-		) + GROUND_MIN_Y - cameraY;
+		) + GROUND_MIN_Y - client.fakeCamera.getCameraZ(client);
 
 		int radius = 96; // ~ 64 * sqrt(2)
 
@@ -1681,76 +1711,80 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 		return false;
 	}
 
+	public int[] firstPersonCameraPosition()
+	{
+		LocalPoint lp = client.getLocalPlayer().getLocalLocation();
+		int cameraX = lp.getX();
+		int cameraY = Perspective.getTileHeight(client, lp, client.getTopLevelWorldView().getPlane()) - 200;
+		int cameraZ = lp.getY();
+
+		return new int[] { cameraX, cameraY, cameraZ };
+	}
+
 	/**
 	 * Draw a renderable in the scene
 	 */
 	@Override
-	public void draw(Projection projection, Scene scene, Renderable renderable, int orientation, int x, int y, int z, long hash)
-	{
+	public void draw(Projection projection, Scene scene, Renderable renderable, int orientation, int x, int y, int z, long hash) {
+		IntProjection p = (IntProjection) projection;
+
+		FirstPersonIntProjection intProjection = new FirstPersonIntProjection(client);
+		intProjection.setCameraX(client.fakeCamera.getCameraX(client));
+		intProjection.setCameraY(client.fakeCamera.getCameraZ(client));
+		intProjection.setCameraZ(client.fakeCamera.getCameraY(client));
+		intProjection.setYawCos(p.getYawCos());
+		intProjection.setYawSin(p.getYawSin());
+		intProjection.setPitchCos(p.getPitchCos());
+		intProjection.setPitchSin(p.getPitchSin());
+
+		p = intProjection;
+
 		Model model, offsetModel;
-		if (renderable instanceof Model)
-		{
+		if (renderable instanceof Model) {
 			model = (Model) renderable;
 			offsetModel = model.getUnskewedModel();
-			if (offsetModel == null)
-			{
+			if (offsetModel == null) {
 				offsetModel = model;
 			}
-		}
-		else
-		{
+		} else {
 			model = renderable.getModel();
-			if (model == null)
-			{
+			if (model == null) {
 				return;
 			}
 			offsetModel = model;
 		}
 
-		if (computeMode == ComputeMode.NONE)
-		{
+		if (computeMode == ComputeMode.NONE) {
 			// Apply height to renderable from the model
-			if (model != renderable)
-			{
+			if (model != renderable) {
 				renderable.setModelHeight(model.getModelHeight());
 			}
 
 			model.calculateBoundsCylinder();
 
-			if (projection instanceof IntProjection)
-			{
-				IntProjection p = (IntProjection) projection;
-				if (!isVisible(model, p.getPitchSin(), p.getPitchCos(), p.getYawSin(), p.getYawCos(), x - p.getCameraX(), y - p.getCameraY(), z - p.getCameraZ()))
-				{
-					return;
-				}
+			if (!isVisible(model, p.getPitchSin(), p.getPitchCos(), p.getYawSin(), p.getYawCos(), x - p.getCameraX(), y - p.getCameraY(), z - p.getCameraZ())) {
+				return;
 			}
 
-			client.checkClickbox(projection, model, orientation, x, y, z, hash);
+			client.checkClickbox(intProjection, model, orientation, x, y, z, hash);
 
 			targetBufferOffset += sceneUploader.pushSortedModel(
-				projection,
-				model, orientation,
-				x, y, z,
-				vertexBuffer, uvBuffer);
+					intProjection,
+					model, orientation,
+					x, y, z,
+					vertexBuffer, uvBuffer);
 		}
 		// Model may be in the scene buffer
-		else if (offsetModel.getSceneId() == sceneId)
-		{
+		else if (offsetModel.getSceneId() == sceneId) {
 			assert model == renderable;
 
 			model.calculateBoundsCylinder();
 
-			if (projection instanceof IntProjection)
-			{
-				IntProjection p = (IntProjection) projection;
-				if (!isVisible(model, p.getPitchSin(), p.getPitchCos(), p.getYawSin(), p.getYawCos(), x - p.getCameraX(), y - p.getCameraY(), z - p.getCameraZ()))
-				{
-					return;
-				}
+			if (!isVisible(model, p.getPitchSin(), p.getPitchCos(), p.getYawSin(), p.getYawCos(), x - p.getCameraX(), y - p.getCameraY(), z - p.getCameraZ())) {
+				return;
 			}
 
-			client.checkClickbox(projection, model, orientation, x, y, z, hash);
+			client.checkClickbox(intProjection, model, orientation, x, y, z, hash);
 
 			int tc = Math.min(MAX_TRIANGLE, offsetModel.getFaceCount());
 			int uvOffset = offsetModel.getUvBufferOffset();
@@ -1769,29 +1803,21 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 			buffer.put(x).put(y).put(z);
 
 			targetBufferOffset += tc * 3;
-		}
-		else
-		{
+		} else {
 			// Temporary model (animated or otherwise not a static Model on the scene)
 
 			// Apply height to renderable from the model
-			if (model != renderable)
-			{
+			if (model != renderable) {
 				renderable.setModelHeight(model.getModelHeight());
 			}
 
 			model.calculateBoundsCylinder();
 
-			if (projection instanceof IntProjection)
-			{
-				IntProjection p = (IntProjection) projection;
-				if (!isVisible(model, p.getPitchSin(), p.getPitchCos(), p.getYawSin(), p.getYawCos(), x - p.getCameraX(), y - p.getCameraY(), z - p.getCameraZ()))
-				{
-					return;
-				}
+			if (!isVisible(model, p.getPitchSin(), p.getPitchCos(), p.getYawSin(), p.getYawCos(), x - p.getCameraX(), y - p.getCameraY(), z - p.getCameraZ())) {
+				return;
 			}
 
-			client.checkClickbox(projection, model, orientation, x, y, z, hash);
+			client.checkClickbox(intProjection, model, orientation, x, y, z, hash);
 
 			boolean hasUv = model.getFaceTextures() != null;
 
@@ -1809,8 +1835,7 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 			buffer.put(x).put(y).put(z);
 
 			tempOffset += len;
-			if (hasUv)
-			{
+			if (hasUv) {
 				tempUvOffset += len;
 			}
 

@@ -454,7 +454,7 @@ public class FishingPlugin extends Plugin
 			return;
 		}
 
-		final LocalPoint cameraPoint = new LocalPoint(client.getCameraX(), client.getCameraY());
+		final LocalPoint cameraPoint = new LocalPoint(client.fakeCamera.getCameraX(client), client.fakeCamera.getCameraY(client));
 		fishingSpots.sort(
 			Comparator.comparingInt(
 				// Negate to have the furthest first
