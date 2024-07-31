@@ -84,12 +84,6 @@ public class SpellbookPlugin extends Plugin
 	private static final WidgetMenuOption RESIZABLE_MAGIC_TAB_UNLOCK = new WidgetMenuOption(UNLOCK,
 		"", ComponentID.RESIZABLE_VIEWPORT_MAGIC_TAB);
 
-	private static final WidgetMenuOption RESIZABLE_BOTTOM_LINE_MAGIC_TAB_LOCK = new WidgetMenuOption(LOCK,
-		"", ComponentID.RESIZABLE_VIEWPORT_BOTTOM_LINE_MAGIC_TAB);
-
-	private static final WidgetMenuOption RESIZABLE_BOTTOM_LINE_MAGIC_TAB_UNLOCK = new WidgetMenuOption(UNLOCK,
-		"", ComponentID.RESIZABLE_VIEWPORT_BOTTOM_LINE_MAGIC_TAB);
-
 	@Inject
 	private Client client;
 
@@ -154,10 +148,8 @@ public class SpellbookPlugin extends Plugin
 	{
 		menuManager.removeManagedCustomMenu(FIXED_MAGIC_TAB_LOCK);
 		menuManager.removeManagedCustomMenu(RESIZABLE_MAGIC_TAB_LOCK);
-		menuManager.removeManagedCustomMenu(RESIZABLE_BOTTOM_LINE_MAGIC_TAB_LOCK);
 		menuManager.removeManagedCustomMenu(FIXED_MAGIC_TAB_UNLOCK);
 		menuManager.removeManagedCustomMenu(RESIZABLE_MAGIC_TAB_UNLOCK);
-		menuManager.removeManagedCustomMenu(RESIZABLE_BOTTOM_LINE_MAGIC_TAB_UNLOCK);
 	}
 
 	private void refreshReorderMenus()
@@ -167,13 +159,11 @@ public class SpellbookPlugin extends Plugin
 		{
 			menuManager.addManagedCustomMenu(FIXED_MAGIC_TAB_LOCK, e -> reordering(false));
 			menuManager.addManagedCustomMenu(RESIZABLE_MAGIC_TAB_LOCK, e -> reordering(false));
-			menuManager.addManagedCustomMenu(RESIZABLE_BOTTOM_LINE_MAGIC_TAB_LOCK, e -> reordering(false));
 		}
 		else
 		{
 			menuManager.addManagedCustomMenu(FIXED_MAGIC_TAB_UNLOCK, e -> reordering(true));
 			menuManager.addManagedCustomMenu(RESIZABLE_MAGIC_TAB_UNLOCK, e -> reordering(true));
-			menuManager.addManagedCustomMenu(RESIZABLE_BOTTOM_LINE_MAGIC_TAB_UNLOCK, e -> reordering(true));
 		}
 	}
 
@@ -406,24 +396,10 @@ public class SpellbookPlugin extends Plugin
 
 	private void reinitializeSpellbook()
 	{
-		Widget w = client.getWidget(ComponentID.SPELLBOOK_PARENT);
-		if (w != null && w.getOnLoadListener() != null)
-		{
-			client.createScriptEvent(w.getOnLoadListener())
-				.setSource(w)
-				.run();
-		}
 	}
 
 	private void redrawSpellbook()
 	{
-		Widget w = client.getWidget(ComponentID.SPELLBOOK_PARENT);
-		if (w != null && w.getOnInvTransmitListener() != null)
-		{
-			client.createScriptEvent(w.getOnInvTransmitListener())
-				.setSource(w)
-				.run();
-		}
 	}
 
 	private int[] calculateSpellbookOrder(int spellbookId, EnumComposition spellbook)

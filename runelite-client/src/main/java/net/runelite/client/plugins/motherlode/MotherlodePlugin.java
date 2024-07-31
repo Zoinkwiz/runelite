@@ -304,22 +304,6 @@ public class MotherlodePlugin extends Plugin
 		boolean sackUpgraded = client.getVarbitValue(Varbits.SACK_UPGRADED) == 1;
 		int sackCapacity = sackUpgraded ? SACK_LARGE_SIZE : SACK_SIZE;
 		int payDir = inv.count(ItemID.PAYDIRT);
-
-		Widget sackSizeWidget = client.getWidget(ComponentID.MLM_SACK_SIZE_TEXT);
-		Widget spaceTextWidget = client.getWidget(ComponentID.MLM_SPACE_TEXT);
-		if (sackSizeWidget != null && spaceTextWidget != null)
-		{
-			if (payDir >= sackCapacity - sackSize)
-			{
-				sackSizeWidget.setTextColor(0xff0000);
-				spaceTextWidget.setTextColor(0xff0000);
-			}
-			else
-			{
-				sackSizeWidget.setTextColor(0xc8c8c8);
-				spaceTextWidget.setTextColor(0xffffff);
-			}
-		}
 	}
 
 	@Subscribe

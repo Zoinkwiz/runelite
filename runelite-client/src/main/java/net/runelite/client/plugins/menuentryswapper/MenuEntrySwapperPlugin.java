@@ -1202,12 +1202,6 @@ public class MenuEntrySwapperPlugin extends Plugin
 				}
 
 				final int interId = WidgetUtil.componentToInterface(w.getId());
-				if (interId == InterfaceID.INVENTORY || (interId == InterfaceID.EQUIPMENT && w.getId() != ComponentID.EQUIPMENT_DIZANAS_QUIVER_ITEM_CONTAINER))
-				{
-					// inventory and worn items have their own swap systems
-					// other than dizanas quiver, since it's not actually an inventory slot but some static widgets
-					continue;
-				}
 
 				// ui swap either:
 				// 1) static components
@@ -1556,8 +1550,7 @@ public class MenuEntrySwapperPlugin extends Plugin
 		if ((menuAction == MenuAction.CC_OP || menuAction == MenuAction.CC_OP_LOW_PRIORITY || menuAction == MenuAction.WIDGET_TARGET)
 			&& w != null && (w.getIndex() == -1 || w.getItemId() != -1)
 			&& w.getActions() != null
-			&& WidgetUtil.componentToInterface(w.getId()) != InterfaceID.INVENTORY
-			&& (WidgetUtil.componentToInterface(w.getId()) != InterfaceID.EQUIPMENT || w.getId() == ComponentID.EQUIPMENT_DIZANAS_QUIVER_ITEM_CONTAINER))
+			&& WidgetUtil.componentToInterface(w.getId()) != InterfaceID.INVENTORY)
 		{
 			// fast check to avoid hitting config on components with single ops
 			if ((index > 0 && menuEntries[index - 1].getWidget() == w) ||
@@ -1959,143 +1952,6 @@ public class MenuEntrySwapperPlugin extends Plugin
 			.worn()
 			.addSub("Fishing Guild", () -> pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 1))
 			.addSub("Otto's Grotto", () -> pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 2));
-		teleportSwap("POH Portals", ItemID.MAX_CAPE_13342)
-			.worn()
-			.addSub("Home", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 0))
-			.addSub("Rimmington", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 1))
-			.addSub("Taverley", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 2))
-			.addSub("Pollnivneach", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 3))
-			.addSub("Hosidius", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 4))
-			.addSub("Rellekka", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 5))
-			.addSub("Brimhaven", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6))
-			.addSub("Yanille", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 7))
-			.addSub("Prifddinas", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 8));
-		teleportSwap("Other Teleports", ItemID.MAX_CAPE_13342)
-			.worn()
-			.addSub("Feldip hills", () ->
-			{
-				pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 1); // Chinchompa Teleports
-				pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 1); // Carnivorous chinchompas (Feldip Hills)
-			})
-			.addSub("Black chinchompas", () ->
-			{
-				pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 1); // Chinchompa Teleports
-				pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 2); // Black chinchompas (Wilderness)
-			})
-			.addSub("Hunter Guild", () ->
-			{
-				pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 1); // Chinchompa Teleports
-				pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 3); // Hunter Guild
-			})
-			.addSub("Farming Guild", () -> pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 2));
-		// endregion
-
-		// region Max cape opheld
-		teleportSwap("Teleports", ItemID.MAX_CAPE)
-			.held()
-			.addSub("Warriors' Guild", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 0))
-			.addSub("Fishing Guild", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 1))
-			.addSub("Crafting Guild", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 2))
-			.addSub("Farming Guild", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 3))
-			.addSub("Otto's Grotto", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 4))
-			.addSub("Feldip hills", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 5); // Chinchompas
-				pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 1); // Carnivorous chinchompas (Feldip Hills)
-			})
-			.addSub("Black chinchompas", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 5); // Chinchompas
-				pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 2); // Black chinchompas (Wilderness)
-			})
-			.addSub("Hunter Guild", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 5); // Chinchompas
-				pauseresume(ComponentID.DIALOG_OPTION_OPTIONS, 3); // Hunter Guild
-			})
-			.addSub("Home", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6); // POH Portals
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 0);
-			})
-			.addSub("Rimmington", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6); // POH Portals
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 1);
-			})
-			.addSub("Taverley", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6); // POH Portals
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 2);
-			})
-			.addSub("Pollnivneach", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6); // POH Portals
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 3);
-			})
-			.addSub("Hosidius", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6); // POH Portals
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 4);
-			})
-			.addSub("Rellekka", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6); // POH Portals
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 5);
-			})
-			.addSub("Brimhaven", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6); // POH Portals
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6);
-			})
-			.addSub("Yanille", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6); // POH Portals
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 7);
-			})
-			.addSub("Prifddinas", () ->
-			{
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6); // POH Portals
-				pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 8);
-			});
-		// endregion
-
-		// region Con cape
-		teleportSwap("Teleport", ItemID.CONSTRUCT_CAPE, ItemID.CONSTRUCT_CAPET)
-			.worn()
-			.held()
-			.addSub("Home", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 0))
-			.addSub("Rimmington", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 1))
-			.addSub("Taverley", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 2))
-			.addSub("Pollnivneach", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 3))
-			.addSub("Hosidius", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 4))
-			.addSub("Rellekka", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 5))
-			.addSub("Brimhaven", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6))
-			.addSub("Yanille", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 7))
-			.addSub("Prifddinas", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 8));
-		// endregion
-
-		// region Achievement diary cape
-		teleportSwap("Teleport", ItemID.ACHIEVEMENT_DIARY_CAPE, ItemID.ACHIEVEMENT_DIARY_CAPE_T)
-			.worn()
-			.held()
-			.addSub("Two-pints", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 0))
-			.addSub("Jarr", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 1))
-			.addSub("Sir Rebral",  () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 2))
-			.addSub("Thorodin",  () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 3))
-			.addSub("Flax keeper",  () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 4))
-			.addSub("Pirate Jackie the Fruit",  () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 5))
-			.addSub("Kaleb Paramaya",  () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 6))
-			.addSub("Jungle forester", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 7))
-			.addSub("TzHaar-Mej", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 8))
-			.addSub("Elise", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 9))
-			.addSub("Hatius Cosaintus", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 10))
-			.addSub("Le-sabrè", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 11))
-			.addSub("Toby", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 12))
-			.addSub("Lesser Fanatic", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 13))
-			.addSub("Elder Gnome child", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 14))
-			.addSub("Twiggy O'Korn", () -> pauseresume(ComponentID.ADVENTURE_LOG_OPTIONS, 15));
-		// endregion
 
 		// region Hunter cape
 		teleportSwap("Teleport", ItemID.HUNTER_CAPE, ItemID.HUNTER_CAPET)
@@ -2123,7 +1979,7 @@ public class MenuEntrySwapperPlugin extends Plugin
 	public void onMenuEntryAdded(MenuEntryAdded menuEntryAdded)
 	{
 		var me = menuEntryAdded.getMenuEntry();
-		if (me.getWidget() != null && me.getWidget().getId() == ComponentID.EQUIPMENT_CAPE)
+		if (me.getWidget() != null)
 		{
 			var item = me.getWidget().getChild(1);
 			var swap = teleportSwaps.get(item.getItemId())

@@ -132,11 +132,6 @@ public class KeyRemappingPlugin extends Plugin
 
 		// The report interface blocks input due to 162:54 being hidden, however player/npc dialog and
 		// options do this too, and so we can't disable remapping just due to 162:54 being hidden.
-		Widget report = client.getWidget(ComponentID.REPORT_ABUSE_PARENT);
-		if (report != null)
-		{
-			return false;
-		}
 
 		return true;
 	}
