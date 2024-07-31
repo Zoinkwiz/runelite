@@ -1096,18 +1096,15 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 
 		// Get new camera position
 		int[] cameraShift = new int[3];
-		cameraShift[0] = client.getCameraX() - client.fakeCamera.getCameraX(client);
-		cameraShift[1] = client.fakeCamera.getCameraY(client) - client.getCameraY(); // Up/Down
-		cameraShift[2] = client.getCameraZ() - client.fakeCamera.getCameraZ(client); // Left/Right
-		System.out.println(cameraShift[0]);
-		System.out.println(cameraShift[1]);
-		System.out.println(cameraShift[2]);
-		System.out.println("-----");
+		cameraShift[0] = client.fakeCamera.getCameraX(client) - client.getCameraX();
+		cameraShift[1] = client.fakeCamera.getCameraZ(client) - client.getCameraZ(); // Left/Right
+		cameraShift[2] = client.fakeCamera.getCameraY(client)-  client.getCameraY(); // Up/Down
+
 		// Apply new camera position adjustments
 		for (int i = 0; i < model.getVertexX().length; i++) {
-//			model.getVertexX()[i] -= cameraShift[0];
-//			model.getVertexY()[i] -= cameraShift[1];
-//			model.getVertexZ()[i] -= cameraShift[2];
+			model.getVertexX()[i] -= cameraShift[0];
+			model.getVertexY()[i] -= cameraShift[1];
+			model.getVertexZ()[i] -= cameraShift[2];
 		}
 
 		if (computeMode == ComputeMode.NONE)
