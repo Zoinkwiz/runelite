@@ -1982,6 +1982,7 @@ public class MenuEntrySwapperPlugin extends Plugin
 		if (me.getWidget() != null)
 		{
 			var item = me.getWidget().getChild(1);
+			if (item == null) return;
 			var swap = teleportSwaps.get(item.getItemId())
 				.stream()
 				.filter(ts -> ts.worn)
